@@ -474,7 +474,7 @@ fun ReasoningPanel(level: Int, onLevelChange: (Int) -> Unit) {
                 text = "推理等级",
                 style = MaterialTheme.typography.headlineSmall,
                 fontFamily = editorialFamily("推理等级"),
-                color = labelColor,
+                color = chat.text,
             )
             Spacer(Modifier.height(10.dp))
             androidx.compose.material3.Slider(

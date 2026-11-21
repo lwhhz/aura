@@ -33,7 +33,12 @@ class ChatStore(context: Context) {
         toolsConsent = prefs.getBoolean(KEY_TOOLS_CONSENT, false),
         deepThinkingOn = prefs.getBoolean(KEY_DEEP_THINKING, true),
         showNotices = prefs.getBoolean(KEY_SHOW_NOTICES, true),
-        reasoningLevel = prefs.getInt(KEY_REASONING_LEVEL, 2),
+        reasoningLevel = if (prefs.getBoolean("reasoning_default_high", false)) {
+            prefs.getInt(KEY_REASONING_LEVEL, 2)
+        } else {
+            prefs.edit().putBoolean("reasoning_default_high", true).apply()
+            2
+        },
     )
 
     fun saveSettings(settings: AppSettings) {
