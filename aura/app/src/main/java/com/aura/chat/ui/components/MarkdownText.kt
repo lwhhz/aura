@@ -47,7 +47,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /** 图片鉴权：手机端通过 sidecar 读取电脑本地图片。 */
-data class MarkdownImageAuth(val baseUrl: String, val token: String)
+data class MarkdownImageAuth(val baseUrl: String, val token: String, val cwd: String = "")
 
 val LocalMarkdownImageAuth = androidx.compose.runtime.staticCompositionLocalOf<MarkdownImageAuth?> { null }
 
@@ -319,8 +319,17 @@ private fun MarkdownTable(header: List<String>, rows: List<List<String>>, color:
 private fun MarkdownImage(alt: String, rawUrl: String) {
     val accent = LocalAuraAccent.current
     val auth = LocalMarkdownImageAuth.current
-    val url = rawUrl.trim().substringBefore(" \"").trim()
-    val path = if (url.startsWith("file://")) url.removePrefix("file://") else url
+    val url = rawUrl.trim()
+        .substringBefore(" \"").trim()
+        .removePrefix("<").removeSuffix(">")
+        .removePrefix("file://")
+    val raw = url
+    val path = if (raw.startsWith("/") || (raw.length > 2 && raw[1] == ':')) {
+        raw
+    } else {
+        val base = auth?.cwd?.trimEnd('/', '\\') ?: ""
+        if (base.isBlank()) raw else base + "/" + raw.trimStart('/', '\\')
+    }
     val remote = when {
         url.startsWith("http://") || url.startsWith("https://") -> url
         auth != null -> auth.baseUrl + "/aura/file?path=" + java.net.URLEncoder.encode(path, "UTF-8") + "&token=" + auth.token

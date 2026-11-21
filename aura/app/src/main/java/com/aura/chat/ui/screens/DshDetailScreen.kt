@@ -137,7 +137,7 @@ fun DshDetailScreen(
 
     CompositionLocalProvider(
         LocalMarkdownImageAuth provides peer?.let {
-            MarkdownImageAuth("http://" + it.host + ":" + it.port, it.token)
+            MarkdownImageAuth("http://" + it.host + ":" + it.port, it.token, detail?.cwd ?: "")
         },
     ) {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -217,7 +217,7 @@ fun DshDetailScreen(
                                 )
                                 Spacer(Modifier.height(4.dp))
                                 MarkdownText(
-                                    text = message.text,
+                                    text = renderUploads(message.text),
                                     color = if (isUser) accent.onChip else accent.text,
                                 )
                             }
@@ -269,6 +269,17 @@ fun DshDetailScreen(
                 }
             }
         }
+    }
+}
+
+private fun renderUploads(text: String): String {
+    val imageExt = listOf(".png", ".jpg", ".jpeg", ".webp", ".gif")
+    return text.split("\n").joinToString("\n") { line ->
+        val trimmed = line.trim()
+        if (trimmed.startsWith("已上传文件：")) {
+            val path = trimmed.removePrefix("已上传文件：").trim()
+            if (imageExt.any { path.lowercase().endsWith(it) }) "![已上传图片](" + path + ")" else line
+        } else line
     }
 }
 
