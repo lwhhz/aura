@@ -204,7 +204,13 @@ fun AssistantBlock(
         }
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
+            shape = RoundedCornerShape(
+                topStart = 28.dp,
+                topEnd = 28.dp,
+                bottomEnd = 28.dp,
+                // 左下角收小，标记“来自 AI”，与用户气泡右下角对应
+                bottomStart = 8.dp,
+            ),
             color = colors.surface,
             contentColor = colors.text,
         ) {

@@ -66,7 +66,7 @@ fun ChatComposer(
     onToggleWebSearch: () -> Unit,
     reasoningLevel: Int,
     onChangeReasoning: (Int) -> Unit,
-    onReasoningPanelToggle: (Boolean) -> Unit = {},
+    onOpenReasoningPanel: () -> Unit,
     attachmentName: String?,
     uploading: Boolean = false,
     onAttach: () -> Unit,
@@ -221,11 +221,7 @@ fun ChatComposer(
                     size = 44.dp,
                     contentDescription = "添加附件",
                 ) { m, c -> PlusGlyph(m, c) }
-                ReasoningLevelControl(
-                    level = reasoningLevel,
-                    onLevelChange = onChangeReasoning,
-                    onOpenChange = onReasoningPanelToggle,
-                )
+                ReasoningLevelControl(level = reasoningLevel, onOpen = onOpenReasoningPanel)
                 AuraIconButton(
                     onClick = onToggleWebSearch,
                     container = when {
@@ -400,81 +396,75 @@ fun LightTopBar(
         )
     }
 }
-/** 推理等级：点击弹出悬浮面板，四个等级用滑块切换，颜色随强度变化。 */
+/** 推理等级按钮：只负责打开面板，面板由 ChatScreen 在根层渲染（保证模糊时清晰）。 */
 @Composable
-private fun ReasoningLevelControl(
-    level: Int,
-    onLevelChange: (Int) -> Unit,
-    onOpenChange: (Boolean) -> Unit,
-) {
+private fun ReasoningLevelControl(level: Int, onOpen: () -> Unit) {
     val accent = LocalAuraAccent.current
     val chat = LocalChatColors.current
-    var open by remember { mutableStateOf(false) }
-    val levelLabels = listOf("OFF", "LOW", "HIGH", "MAX")
-    val label = levelLabels[level.coerceIn(0, 3)]
+    val label = reasoningLabels[level.coerceIn(0, 3)]
+    AuraIconButton(
+        onClick = onOpen,
+        container = accent.chip,
+        content = chat.onSurfaceControl,
+        size = 44.dp,
+        contentDescription = "推理等级：" + label,
+    ) { m, cb ->
+        Icon(
+            imageVector = Icons.Rounded.Bolt,
+            contentDescription = null,
+            modifier = m.size(20.dp),
+            tint = cb,
+        )
+    }
+}
+
+private val reasoningLabels = listOf("OFF", "LOW", "HIGH", "MAX")
+
+/** 推理等级面板：宽圆角矩形 + 四级滑块，文本颜色随等级变化。 */
+@Composable
+fun ReasoningPanel(level: Int, onLevelChange: (Int) -> Unit) {
+    val accent = LocalAuraAccent.current
+    val chat = LocalChatColors.current
+    val label = reasoningLabels[level.coerceIn(0, 3)]
     val labelColor = when (level) {
         0 -> chat.muted
         1 -> accent.deep.copy(alpha = 0.55f)
         2 -> accent.deep.copy(alpha = 0.8f)
         else -> accent.deep
     }
-    Box {
-        AuraIconButton(
-            onClick = { open = true; onOpenChange(true) },
-            container = accent.chip,
-            content = chat.onSurfaceControl,
-            size = 44.dp,
-            contentDescription = "推理等级：" + label,
-        ) { m, cb ->
-            Icon(
-                imageVector = Icons.Rounded.Bolt,
-                contentDescription = null,
-                modifier = m.size(20.dp),
-                tint = cb,
+    Surface(
+        modifier = Modifier.width(268.dp),
+        shape = RoundedCornerShape(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 6.dp,
+        shadowElevation = 0.dp,
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.headlineSmall,
+                fontFamily = editorialFamily(label),
+                color = labelColor,
             )
-        }
-        if (open) {
-            androidx.compose.ui.window.Popup(
-                alignment = Alignment.TopCenter,
-                offset = androidx.compose.ui.unit.IntOffset(0, -with(androidx.compose.ui.platform.LocalDensity.current) { 150.dp.roundToPx() }),
-                onDismissRequest = { open = false; onOpenChange(false) },
-            ) {
-                Surface(
-                    modifier = Modifier.width(260.dp),
-                    shape = RoundedCornerShape(24.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 6.dp,
-                    shadowElevation = 0.dp,
-                ) {
-                    Column(Modifier.padding(20.dp)) {
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontFamily = editorialFamily(label),
-                            color = labelColor,
-                        )
-                        Spacer(Modifier.height(10.dp))
-                        androidx.compose.material3.Slider(
-                            value = level.toFloat(),
-                            onValueChange = { onLevelChange(it.coerceIn(0f, 3f).toInt()) },
-                            valueRange = 0f..3f,
-                            steps = 2,
-                            colors = androidx.compose.material3.SliderDefaults.colors(
-                                thumbColor = accent.deep,
-                                activeTrackColor = accent.deep,
-                                inactiveTrackColor = accent.chip,
-                            ),
-                        )
-                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            levelLabels.forEach { item ->
-                                Text(
-                                    text = item,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = if (item == label) labelColor else chat.muted.copy(alpha = 0.6f),
-                                )
-                            }
-                        }
-                    }
+            Spacer(Modifier.height(10.dp))
+            androidx.compose.material3.Slider(
+                value = level.toFloat(),
+                onValueChange = { onLevelChange(it.coerceIn(0f, 3f).toInt()) },
+                valueRange = 0f..3f,
+                steps = 2,
+                colors = androidx.compose.material3.SliderDefaults.colors(
+                    thumbColor = accent.deep,
+                    activeTrackColor = accent.deep,
+                    inactiveTrackColor = accent.chip,
+                ),
+            )
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                reasoningLabels.forEach { item ->
+                    Text(
+                        text = item,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (item == label) labelColor else chat.muted.copy(alpha = 0.6f),
+                    )
                 }
             }
         }

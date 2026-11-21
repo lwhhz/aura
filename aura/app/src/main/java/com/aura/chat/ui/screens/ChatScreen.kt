@@ -1,5 +1,8 @@
 package com.aura.chat.ui.screens
 
+import com.aura.chat.ui.components.ReasoningPanel
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.blur
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -86,10 +89,10 @@ fun ChatScreen(
 ) {
     var showToolsConsent by remember { mutableStateOf(false) }
     var reasoningPanelOpen by remember { mutableStateOf(false) }
-    val messageBlur by androidx.compose.animation.core.animateDpAsState(
+    val contentBlur by androidx.compose.animation.core.animateDpAsState(
         targetValue = if (reasoningPanelOpen) 14.dp else 0.dp,
         animationSpec = androidx.compose.animation.core.tween(220),
-        label = "messageBlur",
+        label = "contentBlur",
     )
     val accent = LocalAuraAccent.current
     val colors = chatColors(dark, accent, MaterialTheme.colorScheme)
@@ -106,6 +109,7 @@ fun ChatScreen(
 
     CompositionLocalProvider(LocalChatColors provides colors) {
         Box(modifier.fillMaxSize().background(colors.background)) {
+            Box(Modifier.fillMaxSize().blur(contentBlur)) {
             if (dark) InkField() else LavenderField()
             Column(Modifier.fillMaxSize().statusBarsPadding()) {
                 DarkTopBar(
@@ -115,13 +119,7 @@ fun ChatScreen(
                         if (settings.demoMode || !settings.hasKey) " · 演示" else " · 已连接",
                     onBack = onBack,
                 )
-                Box(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .blur(messageBlur),
-                    contentAlignment = Alignment.TopCenter,
-                ) {
+                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxHeight().widthIn(max = 640.dp),
@@ -180,10 +178,32 @@ fun ChatScreen(
                             onAttach = onAttach,
                             onClearAttachment = onClearAttachment,
                             onUnavailable = { feature -> onCopy(feature) },
-                        onReasoningPanelToggle = { reasoningPanelOpen = it },
+                        onOpenReasoningPanel = { reasoningPanelOpen = true },
                             dark = dark,
                         )
                     }
+                }
+            }
+            }
+
+            if (reasoningPanelOpen) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                            indication = null,
+                        ) { reasoningPanelOpen = false }
+                )
+                Box(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset(x = 56.dp, y = (-104).dp)
+                ) {
+                    ReasoningPanel(
+                        level = settings.reasoningLevel,
+                        onLevelChange = { level -> reasoningPanelOpen = false; onChangeReasoning(level) },
+                    )
                 }
             }
 
