@@ -1,0 +1,25 @@
+# Gradle / Android build outputs
+aura/.gradle/
+aura/.kotlin/
+aura/build/
+aura/app/build/
+aura/local.properties
+*.iml
+.idea/
+
+# Signing secrets (never commit)
+aura/keystore.properties
+*.keystore
+*.jks
+
+# Local API tokens
+token.txt
+
+# Release artifacts are published as GitHub Release assets
+dist/
+
+# Scratch
+*.log
+# Large local reference assets (not needed to build)
+aura/screenshots/
+fonts/

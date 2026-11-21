@@ -1,0 +1,9 @@
+Noto Serif CJK SC — subset for this project
+Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name "Source".
+
+This font is distributed under the SIL Open Font License, Version 1.1.
+The full license text is the same as OFL 1.1 (see PlayfairDisplay-OFL.txt in this
+folder); the copyright line above applies to Noto Serif CJK.
+
+Source: Google Noto CJK (https://github.com/notofonts/noto-cjk), Noto Serif CJK SC subset,
+glyph set trimmed to GB2312 level-1 plus the characters used by this app.
