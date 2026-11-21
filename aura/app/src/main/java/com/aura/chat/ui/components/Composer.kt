@@ -66,7 +66,7 @@ fun ChatComposer(
     onToggleWebSearch: () -> Unit,
     reasoningLevel: Int,
     onChangeReasoning: (Int) -> Unit,
-    onOpenReasoningPanel: () -> Unit,
+    onReasoningPanelToggle: (Boolean) -> Unit = {},
     attachmentName: String?,
     uploading: Boolean = false,
     onAttach: () -> Unit,
@@ -221,7 +221,11 @@ fun ChatComposer(
                     size = 44.dp,
                     contentDescription = "添加附件",
                 ) { m, c -> PlusGlyph(m, c) }
-                ReasoningLevelControl(level = reasoningLevel, onOpen = onOpenReasoningPanel)
+                ReasoningLevelControl(
+                    level = reasoningLevel,
+                    onOpenChange = onReasoningPanelToggle,
+                    onChange = onChangeReasoning,
+                )
                 AuraIconButton(
                     onClick = onToggleWebSearch,
                     container = when {
@@ -396,30 +400,46 @@ fun LightTopBar(
         )
     }
 }
-/** 推理等级按钮：只负责打开面板，面板由 ChatScreen 在根层渲染（保证模糊时清晰）。 */
+/** 推理等级按钮：Popup 真正锚定在按钮上方，外层整页模糊不影响 Popup 窗口。 */
 @Composable
-private fun ReasoningLevelControl(level: Int, onOpen: () -> Unit) {
+private fun ReasoningLevelControl(level: Int, onOpenChange: (Boolean) -> Unit, onChange: (Int) -> Unit) {
     val accent = LocalAuraAccent.current
     val chat = LocalChatColors.current
+    var open by remember { mutableStateOf(false) }
     val label = reasoningLabels[level.coerceIn(0, 3)]
-    AuraIconButton(
-        onClick = onOpen,
-        container = accent.chip,
-        content = chat.onSurfaceControl,
-        size = 44.dp,
-        contentDescription = "推理等级：" + label,
-    ) { m, cb ->
-        Icon(
-            imageVector = Icons.Rounded.Bolt,
-            contentDescription = null,
-            modifier = m.size(20.dp),
-            tint = cb,
-        )
+    val density = LocalDensity.current
+    Box {
+        AuraIconButton(
+            onClick = { open = true; onOpenChange(true) },
+            container = accent.chip,
+            content = chat.onSurfaceControl,
+            size = 44.dp,
+            contentDescription = "推理等级：" + label,
+        ) { m, cb ->
+            Icon(
+                imageVector = Icons.Rounded.Bolt,
+                contentDescription = null,
+                modifier = m.size(20.dp),
+                tint = cb,
+            )
+        }
+        if (open) {
+            Popup(
+                alignment = Alignment.TopCenter,
+                offset = androidx.compose.ui.unit.IntOffset(0, -with(density) { 172.dp.roundToPx() }),
+                onDismissRequest = { open = false; onOpenChange(false) },
+                properties = androidx.compose.ui.window.PopupProperties(focusable = true),
+            ) {
+                ReasoningPanel(
+                    level = level,
+                    onLevelChange = { onChange(it) },
+                )
+            }
+        }
     }
 }
 
 private val reasoningLabels = listOf("OFF", "LOW", "HIGH", "MAX")
-
 /** 推理等级面板：宽圆角矩形 + 四级滑块，文本颜色随等级变化。 */
 @Composable
 fun ReasoningPanel(level: Int, onLevelChange: (Int) -> Unit) {

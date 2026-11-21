@@ -1,6 +1,5 @@
 package com.aura.chat.ui.screens
 
-import com.aura.chat.ui.components.ReasoningPanel
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.blur
@@ -178,33 +177,12 @@ fun ChatScreen(
                             onAttach = onAttach,
                             onClearAttachment = onClearAttachment,
                             onUnavailable = { feature -> onCopy(feature) },
-                        onOpenReasoningPanel = { reasoningPanelOpen = true },
+                        onReasoningPanelToggle = { reasoningPanelOpen = it },
                             dark = dark,
                         )
                     }
                 }
             }
-            }
-
-            if (reasoningPanelOpen) {
-                Box(
-                    Modifier
-                        .fillMaxSize()
-                        .clickable(
-                            interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
-                            indication = null,
-                        ) { reasoningPanelOpen = false }
-                )
-                Box(
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .offset(x = 56.dp, y = (-104).dp)
-                ) {
-                    ReasoningPanel(
-                        level = settings.reasoningLevel,
-                        onLevelChange = { level -> reasoningPanelOpen = false; onChangeReasoning(level) },
-                    )
-                }
             }
 
             if (showToolsConsent) {
