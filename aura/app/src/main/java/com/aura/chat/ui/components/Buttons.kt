@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonGroupDefaults
@@ -283,3 +284,35 @@ fun ConnectedChoiceRow(
 
 /** 空状态 / 说明用的内边距常量。 */
 val ScreenHorizontal = PaddingValues(horizontal = 20.dp)
+/** 独立的模型选择胶囊：不依赖工具底托的尺寸，内容自适应宽度。 */
+@Composable
+fun ModelPill(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accent = LocalAuraAccent.current
+    Surface(
+        onClick = onClick,
+        modifier = modifier.height(48.dp).widthIn(max = 160.dp),
+        shape = CircleShape,
+        color = accent.chip,
+        contentColor = accent.onChip,
+    ) {
+        Row(
+            modifier = Modifier.fillMaxHeight().padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+        ) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                fontFamily = com.aura.chat.ui.theme.editorialFamily(text),
+                maxLines = 1,
+                softWrap = false,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            )
+        }
+    }
+}
