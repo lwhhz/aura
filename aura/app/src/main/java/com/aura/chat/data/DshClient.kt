@@ -6,7 +6,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /** 与 Aura 配对桥（sidecar/插件）通信。 */
-data class DshDetailMessage(val seq: Long, val role: String, val text: String)
+data class DshDetailMessage(val seq: Long, val role: String, val text: String, val name: String = "")
 
 data class DshSessionDetail(val id: String, val title: String, val cwd: String, val messages: List<DshDetailMessage>)
 
@@ -26,16 +26,16 @@ object DshClient {
             try {
                 val text = conn.inputStream.bufferedReader().readText()
                 val root = JSONObject(text)
-                val array = root.optJSONArray("messages") ?: org.json.JSONArray()
+                val array = root.optJSONArray("items") ?: root.optJSONArray("messages") ?: org.json.JSONArray()
                 val all = buildList {
                     for (i in 0 until array.length()) {
                         val item = array.optJSONObject(i) ?: continue
                         val role = item.optString("role")
                         if (role == "system") continue
-                        add(DshDetailMessage(item.optLong("seq"), role, item.optString("text")))
+                        add(DshDetailMessage(item.optLong("seq"), role, item.optString("text"), item.optString("name")))
                     }
                 }
-                val messages = if (all.size > 200) all.takeLast(200) else all
+                val messages = if (all.size > 400) all.takeLast(400) else all
                 DshSessionDetail(
                     id = root.optString("id"),
                     title = root.optString("title"),

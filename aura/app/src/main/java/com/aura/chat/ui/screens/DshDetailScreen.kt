@@ -44,7 +44,41 @@ fun DshDetailScreen(
 ) {
     val accent = LocalAuraAccent.current
     val listState = rememberLazyListState()
-    val count = detail?.messages?.size ?: 0
+    val all = detail?.messages ?: emptyList()
+    // 只保留：用户输入 + 每轮最终的助手输出
+    val display = buildList {
+        var pending: com.aura.chat.data.DshDetailMessage? = null
+        for (item in all) {
+            val injected = item.role == "user" && (
+                item.text.startsWith("[Plugin context") ||
+                    item.text.startsWith("Time sampled") ||
+                    item.text.startsWith("<system-reminder") ||
+                    item.text.startsWith("<path>") ||
+                    item.text.startsWith("<content>")
+                )
+            if (injected) continue
+            when (item.role) {
+                "user" -> {
+                    pending?.let { add(it) }
+                    pending = null
+                    add(item)
+                }
+                "assistant" -> pending = item
+                else -> Unit
+            }
+        }
+        pending?.let { add(it) }
+    }.takeLast(20)
+    val last = all.lastOrNull()
+    val processing = last != null && last.role !in setOf("user", "assistant")
+    val statusText = when (last?.role) {
+        "tool" -> "正在调用 " + last.name.ifBlank { "工具" } + "…"
+        "tool_result" -> "工具已返回，继续处理…"
+        "reasoning" -> "思考中…"
+        "user" -> "已发送，等待响应…"
+        else -> "处理中…"
+    }
+    val count = display.size
     LaunchedEffect(count) {
         if (count > 0) listState.scrollToItem(count - 1)
     }
@@ -81,7 +115,23 @@ fun DshDetailScreen(
                     AuraPill(text = "重试", onClick = onRefresh, style = PillStyle.Deep)
                 }
             }
-            if (detail != null && detail.messages.isEmpty() && !loading) {
+            if (processing) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = accent.deep.copy(alpha = 0.10f),
+                ) {
+                    Text(
+                        text = "● " + statusText,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = accent.muted,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
+                }
+            }
+            if (detail != null && display.isEmpty() && !loading) {
                 Text(
                     "这个会话还没有消息。",
                     Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
@@ -95,23 +145,39 @@ fun DshDetailScreen(
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                items(detail?.messages?.size ?: 0) { index ->
-                    val message = detail!!.messages[index]
+                items(display.size) { index ->
+                    val message = display[index]
                     val isUser = message.role == "user"
+                    val isReasoning = message.role == "reasoning"
+                    val isTool = message.role == "tool" || message.role == "tool_result"
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(24.dp),
-                        color = if (isUser) accent.chip else accent.card,
+                        shape = RoundedCornerShape(if (isTool) 16.dp else 24.dp),
+                        color = when {
+                            isUser -> accent.chip
+                            isReasoning -> accent.card.copy(alpha = 0.7f)
+                            isTool -> accent.deep.copy(alpha = 0.10f)
+                            else -> accent.card
+                        },
                         contentColor = if (isUser) accent.onChip else accent.text,
                     ) {
-                        Column(Modifier.padding(16.dp)) {
+                        Column(Modifier.padding(if (isTool) 12.dp else 16.dp)) {
                             Text(
-                                text = message.role,
+                                text = when {
+                                    isReasoning -> "思考"
+                                    isTool -> (if (message.role == "tool_result") "结果 · " else "调用 · ") + message.name.ifBlank { "tool" }
+                                    else -> message.role
+                                },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = if (isUser) accent.onChip.copy(alpha = 0.7f) else accent.muted,
                             )
                             Spacer(Modifier.height(4.dp))
-                            Text(text = message.text, style = MaterialTheme.typography.bodyMedium)
+                            Text(
+                                text = message.text,
+                                style = if (isTool) MaterialTheme.typography.bodySmall else MaterialTheme.typography.bodyMedium,
+                                maxLines = if (isTool || isReasoning) 2 else Int.MAX_VALUE,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                            )
                         }
                     }
                 }
