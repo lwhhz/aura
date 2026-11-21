@@ -22,18 +22,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -49,7 +50,7 @@ private const val SERVICE_TYPE = "_dsh._tcp."
 
 data class DiscoveredHost(val name: String, val host: String, val port: Int)
 
-/** 局域网配对：mDNS 自动发现 + 手动 IP/端口 + 配对码。 */
+/** 局域网配对：mDNS 自动发现 + 手动 IP/端口/配对码。 */
 @Composable
 fun DshPairScreen(
     onBack: () -> Unit,
@@ -143,7 +144,6 @@ fun DshPairScreen(
                 } else {
                     items(hosts) { host ->
                         Surface(
-                            onClick = { onConnect(host.host, host.port, code) },
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(24.dp),
                             color = accent.card,
@@ -170,39 +170,43 @@ fun DshPairScreen(
                     ) {
                         Column(Modifier.padding(18.dp)) {
                             Text("手动连接", style = MaterialTheme.typography.titleMedium, color = accent.text)
-                            Spacer(Modifier.height(10.dp))
+                            Spacer(Modifier.height(12.dp))
                             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                OutlinedTextField(
+                                TextField(
                                     value = manualHost,
                                     onValueChange = { manualHost = it },
                                     label = { Text("IP 地址") },
                                     singleLine = true,
+                                    shape = RoundedCornerShape(18.dp),
+                                    colors = pairFieldColors(),
                                     modifier = Modifier.weight(1f),
                                 )
-                                OutlinedTextField(
+                                TextField(
                                     value = manualPort,
                                     onValueChange = { manualPort = it.filter { c -> c.isDigit() } },
                                     label = { Text("端口") },
                                     singleLine = true,
+                                    shape = RoundedCornerShape(18.dp),
+                                    colors = pairFieldColors(),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                    modifier = Modifier.size(width = 96.dp, height = 56.dp),
+                                    modifier = Modifier.size(width = 104.dp, height = 64.dp),
                                 )
                             }
-                            Spacer(Modifier.height(10.dp))
-                            OutlinedTextField(
+                            Spacer(Modifier.height(12.dp))
+                            TextField(
                                 value = code,
-                                onValueChange = { code = it },
+                                onValueChange = { code = it.filter { c -> c.isDigit() }.take(6) },
                                 label = { Text("6 位配对码") },
                                 singleLine = true,
+                                shape = RoundedCornerShape(18.dp),
+                                colors = pairFieldColors(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 modifier = Modifier.fillMaxWidth(),
                             )
-                            Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(14.dp))
                             AuraPill(
                                 text = "连接",
-                                onClick = {
-                                    onConnect(manualHost.trim(), manualPort.toIntOrNull() ?: 8765, code)
-                                },
+                                onClick = { onConnect(manualHost.trim(), manualPort.toIntOrNull() ?: 8765, code) },
                                 style = PillStyle.Deep,
                             )
                         }
@@ -218,6 +222,23 @@ fun DshPairScreen(
             }
         }
     }
+}
+
+@Composable
+private fun pairFieldColors() = run {
+    val accent = LocalAuraAccent.current
+    TextFieldDefaults.colors(
+        focusedContainerColor = accent.chip,
+        unfocusedContainerColor = accent.chip,
+        focusedIndicatorColor = Color.Transparent,
+        unfocusedIndicatorColor = Color.Transparent,
+        disabledIndicatorColor = Color.Transparent,
+        cursorColor = accent.deep,
+        focusedLabelColor = accent.onChip.copy(alpha = 0.85f),
+        unfocusedLabelColor = accent.onChip.copy(alpha = 0.7f),
+        focusedTextColor = accent.onChip,
+        unfocusedTextColor = accent.onChip,
+    )
 }
 
 private fun nsd(context: Context): NsdManager =
