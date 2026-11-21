@@ -41,6 +41,8 @@ fun DshDetailScreen(
     error: String?,
     onBack: () -> Unit,
     onRefresh: () -> Unit,
+    maxTurns: Int = 10,
+    maxItems: Int = 20,
 ) {
     val accent = LocalAuraAccent.current
     val listState = rememberLazyListState()
@@ -68,7 +70,7 @@ fun DshDetailScreen(
             }
         }
         pending?.let { add(it) }
-    }.takeLast(20)
+    }.takeLast(minOf(maxTurns * 2, maxItems))
     val last = all.lastOrNull()
     val processing = last != null && last.role !in setOf("user", "assistant")
     val statusText = when (last?.role) {
@@ -121,6 +123,7 @@ fun DshDetailScreen(
                     shape = RoundedCornerShape(14.dp),
                     color = accent.deep.copy(alpha = 0.10f),
                 ) {
+                    Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                     Text(
                         text = "● " + statusText,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
@@ -129,6 +132,9 @@ fun DshDetailScreen(
                         maxLines = 1,
                         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                     )
+                    Spacer(Modifier.height(6.dp))
+                    com.aura.chat.ui.components.WaveProgress(Modifier.fillMaxWidth())
+                    }
                 }
             }
             if (detail != null && display.isEmpty() && !loading) {
@@ -172,12 +178,19 @@ fun DshDetailScreen(
                                 color = if (isUser) accent.onChip.copy(alpha = 0.7f) else accent.muted,
                             )
                             Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = message.text,
-                                style = if (isTool) MaterialTheme.typography.bodySmall else MaterialTheme.typography.bodyMedium,
-                                maxLines = if (isTool || isReasoning) 2 else Int.MAX_VALUE,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                            )
+                            if (isUser || message.role == "assistant") {
+                                com.aura.chat.ui.components.MarkdownText(
+                                    text = message.text,
+                                    color = if (isUser) accent.onChip else accent.text,
+                                )
+                            } else {
+                                Text(
+                                    text = message.text,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 2,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                )
+                            }
                         }
                     }
                 }

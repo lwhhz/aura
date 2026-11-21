@@ -134,6 +134,8 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
                         error = vm.dshDetailError,
                         onBack = vm::back,
                         onRefresh = { vm.loadDshDetail((route as Route.DshDetail).id) },
+                        maxTurns = vm.settings.detailMaxTurns,
+                        maxItems = vm.settings.detailMaxItems,
                     )
 
                     Route.DshPair -> DshPairScreen(

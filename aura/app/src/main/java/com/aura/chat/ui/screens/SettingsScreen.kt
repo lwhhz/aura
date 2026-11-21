@@ -243,6 +243,32 @@ fun SettingsScreen(
                     }
 
                     item {
+                        SettingsCard(eyebrow = "会话详情", title = "显示范围") {
+                            Text("保留最近几轮", style = MaterialTheme.typography.bodySmall, color = palette.eyebrow)
+                            Spacer(Modifier.height(6.dp))
+                            ConnectedChoiceRow(
+                                options = listOf("5 轮", "10 轮", "20 轮", "50 轮"),
+                                selectedIndex = when (settings.detailMaxTurns) { 5 -> 0; 20 -> 2; 50 -> 3; else -> 1 },
+                                onSelect = { index ->
+                                    val turns = listOf(5, 10, 20, 50)[index]
+                                    onChange { it.copy(detailMaxTurns = turns) }
+                                },
+                            )
+                            Spacer(Modifier.height(12.dp))
+                            Text("每轮最多消息", style = MaterialTheme.typography.bodySmall, color = palette.eyebrow)
+                            Spacer(Modifier.height(6.dp))
+                            ConnectedChoiceRow(
+                                options = listOf("20 条", "50 条", "100 条"),
+                                selectedIndex = when (settings.detailMaxItems) { 20 -> 0; 100 -> 2; else -> 1 },
+                                onSelect = { index ->
+                                    val items = listOf(20, 50, 100)[index]
+                                    onChange { it.copy(detailMaxItems = items) }
+                                },
+                            )
+                        }
+                    }
+
+                    item {
                         SettingsCard(eyebrow = "外观", title = "主题") {
                             ConnectedChoiceRow(
                                 options = listOf("浅色", "深色", "跟随系统"),
@@ -273,7 +299,7 @@ fun SettingsScreen(
                     }
 
                     item {
-                        SettingsCard(eyebrow = "关于", title = "Aura 1.4.4") {
+                        SettingsCard(eyebrow = "关于", title = "Aura 1.5.1") {
                             Text(
                                 text = "Aura 是 DeepSeek 官方开源 chat-demo（MIT）的 Android 复刻：界面按 Material 3 Expressive 与薰衣草编辑风重新设计，对话能力接入官方 chat/completions。" +
                                     "联网检索、深度思考与文件解析均为官方服务端工具，调用会按官方价格额外计费。" +

@@ -54,6 +54,8 @@ class ChatStore(context: Context) {
             .putBoolean(KEY_DEEP_THINKING, settings.deepThinkingOn)
             .putBoolean(KEY_SHOW_NOTICES, settings.showNotices)
             .putInt(KEY_REASONING_LEVEL, settings.reasoningLevel)
+            .putInt("detail_max_turns", settings.detailMaxTurns)
+            .putInt("detail_max_items", settings.detailMaxItems)
             .apply()
     }
 
