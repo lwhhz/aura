@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aura.chat.data.DocumentReader
 import com.aura.chat.data.Models
 import com.aura.chat.data.ThemeMode
+import com.aura.chat.ui.screens.DshDetailScreen
 import com.aura.chat.ui.screens.DshPairScreen
 import com.aura.chat.ui.screens.DshSessionsScreen
 import com.aura.chat.ui.screens.ChatScreen
@@ -122,10 +123,17 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
                         loading = vm.dshSessionsLoading,
                         error = vm.dshSessionsError,
                         onRefresh = vm::loadDshSessions,
-                        onOpenSession = { session ->
-                            vm.notifyUser("远程会话「" + session.title + "」详情页开发中")
-                        },
+                        onOpenSession = { vm.openDshDetail(it) },
                         onPair = vm::openDshPair,
+                    )
+
+                    is Route.DshDetail -> DshDetailScreen(
+                        sessionId = (route as Route.DshDetail).id,
+                        detail = vm.dshDetail,
+                        loading = vm.dshDetailLoading,
+                        error = vm.dshDetailError,
+                        onBack = vm::back,
+                        onRefresh = { vm.loadDshDetail((route as Route.DshDetail).id) },
                     )
 
                     Route.DshPair -> DshPairScreen(

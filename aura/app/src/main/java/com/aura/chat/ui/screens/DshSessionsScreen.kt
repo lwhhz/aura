@@ -64,7 +64,7 @@ fun DshSessionsScreen(
     loading: Boolean = false,
     error: String? = null,
     onRefresh: () -> Unit = {},
-    onOpenSession: (DshSession) -> Unit,
+    onOpenSession: (String) -> Unit = {},
     onPair: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -150,7 +150,7 @@ fun DshSessionsScreen(
                 }
                 items(sessions.size) { index ->
                     val session = sessions[index]
-                    DshSessionCard(session = session, onClick = {})
+                    DshSessionCard(session = session, onClick = { onOpenSession(session.id) })
                 }
                 item(key = "pair") {
                     Surface(

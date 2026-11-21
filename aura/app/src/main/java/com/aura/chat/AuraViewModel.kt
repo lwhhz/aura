@@ -22,6 +22,7 @@ import com.aura.chat.data.MessageStatus
 import com.aura.chat.data.DshClient
 import com.aura.chat.data.DshPeer
 import com.aura.chat.data.DshRemoteSession
+import com.aura.chat.data.DshSessionDetail
 import com.aura.chat.data.DshStore
 import com.aura.chat.data.Models
 import com.aura.chat.data.OfficialFiles
@@ -38,6 +39,7 @@ sealed interface Route {
     data class Chat(val id: String) : Route
     data object Settings : Route
     data object DshSessions : Route
+    data class DshDetail(val id: String) : Route
     data object DshPair : Route
 }
 
@@ -81,6 +83,36 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         private set
     var dshSessionsError by mutableStateOf<String?>(null)
         private set
+
+    var dshDetail by mutableStateOf<DshSessionDetail?>(null)
+        private set
+    var dshDetailLoading by mutableStateOf(false)
+        private set
+    var dshDetailError by mutableStateOf<String?>(null)
+        private set
+
+    fun loadDshDetail(id: String) {
+        val peer = dshPeer ?: return
+        viewModelScope.launch {
+            dshDetailLoading = true
+            runCatching { DshClient.detail(peer.host, peer.port, peer.token, id) }
+                .onSuccess {
+                    val previousLast = dshDetail?.messages?.lastOrNull()?.seq ?: -1L
+                    val nextLast = it.messages.lastOrNull()?.seq ?: -1L
+                    if (previousLast != nextLast || dshDetail?.messages?.size != it.messages.size) dshDetail = it
+                    dshDetailError = null
+                }
+                .onFailure {
+                    val raw = it.message ?: ""
+                    dshDetailError = when {
+                        raw.contains("404") || raw.contains("FileNotFound") -> "插件版本过旧：重启 DSH 桌面端后可用"
+                        raw.contains("timed out") || raw.contains("refused") -> "连不上电脑：检查 sidecar 是否在运行"
+                        else -> raw.ifBlank { "拉取失败" }
+                    }
+                }
+            dshDetailLoading = false
+        }
+    }
 
     fun loadDshSessions() {
         val peer = dshPeer ?: return
@@ -261,6 +293,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
             Route.Settings -> Route.Home
             Route.DshSessions -> Route.Home
             Route.DshPair -> Route.DshSessions
+            is Route.DshDetail -> Route.DshSessions
             Route.Home -> Route.Home
         }
     }
@@ -268,6 +301,11 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     fun openDshSessions() {
         route = Route.DshSessions
         loadDshSessions()
+    }
+
+    fun openDshDetail(id: String) {
+        route = Route.DshDetail(id)
+        loadDshDetail(id)
     }
 
     fun openDshPair() {
