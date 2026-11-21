@@ -3,6 +3,7 @@ package com.aura.chat.ui.components
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,6 +23,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -351,12 +353,30 @@ private fun MarkdownImage(alt: String, rawUrl: String) {
             }.getOrNull()
         }
     }
+    var preview by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
     val image = bitmap
+    if (image != null && preview) {
+        androidx.compose.ui.window.Dialog(onDismissRequest = { preview = false }, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
+            androidx.compose.foundation.layout.Box(
+                Modifier.fillMaxWidth().heightIn(max = 2000.dp).background(Color.Black)
+                    .clickable { preview = false },
+                contentAlignment = androidx.compose.ui.Alignment.Center,
+            ) {
+                Image(
+                    bitmap = image,
+                    contentDescription = alt,
+                    modifier = Modifier.fillMaxWidth(),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        }
+    }
     if (image != null) {
         Image(
             bitmap = image,
             contentDescription = alt.ifBlank { null },
-            modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).clip(RoundedCornerShape(12.dp)),
+            modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).clip(RoundedCornerShape(12.dp))
+                .clickable { preview = true },
             contentScale = ContentScale.Fit,
         )
     } else {

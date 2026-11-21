@@ -79,6 +79,7 @@ fun DshDetailScreen(
     val listState = rememberLazyListState()
     var draft by remember { mutableStateOf("") }
     var pendingFiles by remember { mutableStateOf<List<Pair<String, ByteArray>>>(emptyList()) }
+    var attachError by remember { mutableStateOf<String?>(null) }
     val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
     val inputInteraction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
     val inputFocused by inputInteraction.collectIsFocusedAsState()
@@ -88,11 +89,13 @@ fun DshDetailScreen(
     val context = LocalContext.current
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri> ->
         if (uris.isNotEmpty()) {
+            var skipped = 0
             val files = uris.mapNotNull { uri ->
                 val name = queryName(context, uri) ?: "upload.bin"
                 val bytes = runCatching { context.contentResolver.openInputStream(uri)?.use { it.readBytes() } }.getOrNull()
-                if (bytes != null && bytes.size <= 20 * 1024 * 1024) name to bytes else null
+                if (bytes != null && bytes.size <= 20 * 1024 * 1024) name to bytes else { skipped++; null }
             }
+            attachError = if (skipped > 0) "已跳过 " + skipped + " 个文件（单个上限 20MB）" else null
             if (files.isNotEmpty()) pendingFiles = pendingFiles + files
         }
     }
@@ -242,37 +245,51 @@ fun DshDetailScreen(
                         color = accent.muted,
                     )
                 }
+                if (attachError != null) {
+                    Text(
+                        text = attachError!!,
+                        modifier = Modifier.padding(horizontal = 20.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = accent.muted,
+                    )
+                }
                 if (pendingFiles.isNotEmpty()) {
-                    Row(
-                        Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+                    androidx.compose.foundation.lazy.LazyRow(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            text = pendingFiles.size.toString() + " 个文件待发送",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = accent.muted,
-                        )
-                        pendingFiles.takeLast(2).forEach { (name, bytes) ->
+                        item {
+                            Text(
+                                text = pendingFiles.size.toString() + " 个待发送",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = accent.muted,
+                                modifier = Modifier.padding(top = 6.dp),
+                            )
+                        }
+                        items(pendingFiles.size) { index ->
+                            val (name, bytes) = pendingFiles[index]
                             Surface(shape = RoundedCornerShape(10.dp), color = accent.chip) {
-                                Text(
-                                    text = name.take(14) + " · " + (bytes.size / 1024) + "KB",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = accent.onChip,
-                                    maxLines = 1,
-                                )
+                                Row(
+                                    modifier = Modifier.padding(start = 8.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = name.take(14) + " · " + (bytes.size / 1024) + "KB",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = accent.onChip,
+                                        maxLines = 1,
+                                    )
+                                    Text(
+                                        text = "  ×",
+                                        modifier = Modifier.clickable {
+                                            pendingFiles = pendingFiles.filterIndexed { i, _ -> i != index }
+                                        },
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = accent.onChip,
+                                    )
+                                }
                             }
                         }
-                        if (pendingFiles.size > 2) {
-                            Text("+" + (pendingFiles.size - 2), style = MaterialTheme.typography.labelSmall, color = accent.muted)
-                        }
-                        Text(
-                            text = "清除",
-                            modifier = Modifier.clickable { pendingFiles = emptyList() },
-                            style = MaterialTheme.typography.labelSmall,
-                            color = accent.deep,
-                        )
                     }
                 }
                 Row(
