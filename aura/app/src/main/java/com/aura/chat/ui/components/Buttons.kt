@@ -168,71 +168,7 @@ fun AuraTag(
     }
 }
 
-/**
- * 可选择的纯色胶囊。选中是实心深紫（浅色页）或实心柠檬（深色页 / 截图里的 PLAY 按钮），
- * 不靠描边表达选中。
- */
-@Composable
-fun SelectPill(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    swatch: Color? = null,
-    onDark: Boolean = false,
-    serif: Boolean = false,
-    height: androidx.compose.ui.unit.Dp? = null,
-    fillWidth: Boolean = false,
-    centerContent: Boolean = false,
-    boldText: Boolean = false,
-    textStyle: androidx.compose.ui.text.TextStyle = MaterialTheme.typography.labelLarge,
-) {
-    val accent = LocalAuraAccent.current
-    val interaction = remember { MutableInteractionSource() }
-    val container = when {
-        selected && onDark -> accent.lemon
-        selected -> accent.deep
-        onDark -> Color.White.copy(alpha = 0.10f)
-        else -> accent.chip
-    }
-    val content = when {
-        selected && onDark -> accent.onLemon
-        selected -> accent.onDeep
-        onDark -> accent.onInk
-        else -> accent.onChip
-    }
-    Surface(
-        onClick = onClick,
-        modifier = modifier.then(
-            if (height != null) Modifier.height(height) else Modifier
-        ).then(if (fillWidth) Modifier.fillMaxWidth() else Modifier),
-        shape = CircleShape,
-        color = container,
-        contentColor = content,
-        border = null,
-        interactionSource = interaction,
-    ) {
-        Row(
-            modifier = Modifier
-                .then(if (height != null) Modifier.fillMaxHeight() else Modifier)
-                .padding(horizontal = 16.dp, vertical = if (height != null) 0.dp else 11.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = if (centerContent) Arrangement.Center else Arrangement.spacedBy(8.dp),
-        ) {
-            if (swatch != null) {
-                Box(Modifier.size(14.dp).background(swatch, CircleShape))
-            }
-            Text(
-                text = text,
-                style = if (boldText) textStyle.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) else textStyle,
-                fontFamily = if (serif) com.aura.chat.ui.theme.editorialFamily(text) else androidx.compose.ui.text.font.FontFamily.Default,
-                letterSpacing = 0.2.sp,
-                maxLines = 1,
-                softWrap = false,
-            )
-        }
-    }
-}
+
 
 /**
  * 三段连接式单选：用 Expressive ToggleButton + connected shapes。
@@ -294,7 +230,8 @@ fun ModelPill(
     val accent = LocalAuraAccent.current
     Surface(
         onClick = onClick,
-        modifier = modifier.height(48.dp).widthIn(max = 160.dp),
+        // 高度与工具底托一致：44dp 图标 + 上下各 6dp
+        modifier = modifier.height(56.dp).widthIn(max = 160.dp),
         shape = CircleShape,
         color = accent.chip,
         contentColor = accent.onChip,
