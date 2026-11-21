@@ -117,6 +117,7 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
 
                     Route.DshSessions -> DshSessionsScreen(
                         onBack = vm::back,
+                        peer = vm.dshPeer,
                         onOpenSession = { session ->
                             vm.notifyUser("远程会话「" + session.title + "」详情页开发中")
                         },
@@ -125,9 +126,7 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
 
                     Route.DshPair -> DshPairScreen(
                         onBack = vm::back,
-                        onConnect = { host, port, code ->
-                            vm.notifyUser("连接 " + host + ":" + port + "（配对桥待实现）")
-                        },
+                        onConnect = { host, port, code -> vm.pairDsh(host, port, code) },
                     )
 
                     Route.Settings -> SettingsScreen(

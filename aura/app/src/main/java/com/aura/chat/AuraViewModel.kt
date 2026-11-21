@@ -19,6 +19,9 @@ import com.aura.chat.data.DeepSeekClient
 import com.aura.chat.data.DemoBrain
 import com.aura.chat.data.DemoChats
 import com.aura.chat.data.MessageStatus
+import com.aura.chat.data.DshClient
+import com.aura.chat.data.DshPeer
+import com.aura.chat.data.DshStore
 import com.aura.chat.data.Models
 import com.aura.chat.data.OfficialFiles
 import com.aura.chat.data.Role
@@ -40,6 +43,7 @@ sealed interface Route {
 class AuraViewModel(app: Application) : AndroidViewModel(app) {
 
     private val store = ChatStore(app)
+    private val dshStore = DshStore(app)
     private val client = DeepSeekClient()
     private var streamJob: Job? = null
 
@@ -62,6 +66,43 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
 
     var notice by mutableStateOf<String?>(null)
         private set
+
+    /** 已配对的 DSH 电脑。 */
+    var dshPeer by mutableStateOf(dshStore.load())
+        private set
+
+    var dshPairing by mutableStateOf(false)
+        private set
+
+    fun pairDsh(host: String, port: Int, code: String) {
+        if (host.isBlank() || code.length != 6) {
+            notice = "请填 IP 和 6 位配对码"
+            return
+        }
+        viewModelScope.launch {
+            dshPairing = true
+            runCatching { DshClient.verify(host, port, code) }
+                .onSuccess { token ->
+                    android.util.Log.d("AuraPairLog", "pair ok host=" + host + " port=" + port)
+                    val peer = DshPeer(host, port, token)
+                    dshStore.save(peer)
+                    dshPeer = peer
+                    route = Route.DshSessions
+                    notice = "已配对：" + host + ":" + port
+                }
+                .onFailure {
+                    android.util.Log.e("AuraPairLog", "pair failed: " + it.message)
+                    notice = it.message ?: "配对失败"
+                }
+            dshPairing = false
+        }
+    }
+
+    fun unpairDsh() {
+        dshStore.clear()
+        dshPeer = null
+        notice = "已解除配对"
+    }
 
     /** 平板双栏时右侧详情选中的会话。 */
     var twoPaneSelection by mutableStateOf<String?>(null)

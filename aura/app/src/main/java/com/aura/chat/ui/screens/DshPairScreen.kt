@@ -10,6 +10,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import android.net.nsd.NsdManager
+import org.json.JSONObject
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetSocketAddress
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import android.net.nsd.NsdServiceInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -86,7 +94,37 @@ fun DshPairScreen(
         if (!permissionGranted) permissionLauncher.launch(permission)
     }
 
+    val scope = rememberCoroutineScope()
     DisposableEffect(Unit) {
+        // UDP 广播兜底：监听 8766，补 mDNS 被防火墙拦截的场景
+        var running = true
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                runCatching {
+                    DatagramSocket(null).apply {
+                        reuseAddress = true
+                        bind(InetSocketAddress(8766))
+                    }
+                }.onSuccess { socket ->
+                    val buffer = ByteArray(2048)
+                    while (running) {
+                        runCatching {
+                            val packet = DatagramPacket(buffer, buffer.size)
+                            socket.receive(packet)
+                            val text = String(packet.data, 0, packet.length)
+                            val json = JSONObject(text)
+                            val name = json.optString("name", "DSH Desktop")
+                            val port = json.optInt("port", 8765)
+                            val host = packet.address.hostAddress ?: return@runCatching
+                            withContext(Dispatchers.Main) {
+                                hosts = (hosts + DiscoveredHost(name, host, port)).distinctBy { it.host + ":" + it.port }
+                            }
+                        }
+                    }
+                    socket.close()
+                }
+            }
+        }
         val listener = object : NsdManager.DiscoveryListener {
             override fun onStartDiscoveryFailed(serviceType: String, errorCode: Int) { scanning = false }
             override fun onStopDiscoveryFailed(serviceType: String, errorCode: Int) {}
@@ -110,7 +148,10 @@ fun DshPairScreen(
         val manager = nsd(context)
         runCatching { manager.discoverServices(SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, listener) }
             .onFailure { scanning = false }
-        onDispose { runCatching { manager.stopServiceDiscovery(listener) } }
+        onDispose {
+            running = false
+            runCatching { manager.stopServiceDiscovery(listener) }
+        }
     }
 
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {

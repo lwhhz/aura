@@ -59,6 +59,7 @@ private val demoSessions = listOf(
 @Composable
 fun DshSessionsScreen(
     onBack: () -> Unit,
+    peer: com.aura.chat.data.DshPeer? = null,
     onOpenSession: (DshSession) -> Unit,
     onPair: () -> Unit,
     modifier: Modifier = Modifier,
@@ -78,6 +79,28 @@ fun DshSessionsScreen(
                 contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 32.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
+                if (peer != null) {
+                    item(key = "peer") {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(24.dp),
+                            color = accent.lemon,
+                            contentColor = accent.onLemon,
+                        ) {
+                            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Column(Modifier.weight(1f)) {
+                                    Text("已配对", style = MaterialTheme.typography.labelMedium, color = accent.onLemon)
+                                    Text(
+                                        peer.host + ":" + peer.port,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = accent.onLemon,
+                                    )
+                                }
+                                Text("token 已保存", style = MaterialTheme.typography.labelSmall, color = accent.onLemon.copy(alpha = 0.8f))
+                            }
+                        }
+                    }
+                }
                 item(key = "header") {
                     Column(Modifier.fillMaxWidth()) {
                         Eyebrow("远程 · 本机 DSH", color = accent.onChip)
