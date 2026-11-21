@@ -80,7 +80,6 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val accent = LocalAuraAccent.current
-    var menuFor by remember { mutableStateOf<Conversation?>(null) }
     var confirmDelete by remember { mutableStateOf<Conversation?>(null) }
 
     Box(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -179,34 +178,12 @@ fun HomeScreen(
                     item(key = "empty") { EmptyHomeCard(onNewChat = onNewChat) }
                 } else {
                     items(recent, key = { it.id }) { conversation ->
-                        Box {
-                            ConversationCard(
-                                conversation = conversation,
-                                onOpen = { onOpen(conversation.id) },
-                                selected = conversation.id == selectedConversationId,
-                                onLongClick = { menuFor = conversation },
-                            )
-                            DropdownMenu(
-                                expanded = menuFor?.id == conversation.id,
-                                onDismissRequest = { menuFor = null },
-                                containerColor = accent.card,
-                                shape = RoundedCornerShape(20.dp),
-                            ) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            "删除对话",
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.error,
-                                        )
-                                    },
-                                    onClick = {
-                                        menuFor = null
-                                        confirmDelete = conversation
-                                    },
-                                )
-                            }
-                        }
+                        ConversationCard(
+                            conversation = conversation,
+                            onOpen = { onOpen(conversation.id) },
+                            onDelete = { confirmDelete = conversation },
+                            selected = conversation.id == selectedConversationId,
+                        )
                     }
                 }
 

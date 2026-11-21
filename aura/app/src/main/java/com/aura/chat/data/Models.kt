@@ -82,6 +82,7 @@ data class AppSettings(
     val toolsConsent: Boolean = false,
     val deepThinkingOn: Boolean = false,
     val showNotices: Boolean = true,
+    val reasoningLevel: Int = 1,
 ) {
     val hasKey: Boolean get() = apiKey.isNotBlank()
     val hasSearchKey: Boolean get() = searchKey.isNotBlank()

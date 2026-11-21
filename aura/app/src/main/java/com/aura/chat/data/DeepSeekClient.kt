@@ -41,6 +41,7 @@ class DeepSeekClient {
         history: List<ChatMessage>,
         tools: Boolean = false,
         thinking: Boolean = false,
+        thinkingBudget: Int? = null,
         fileId: String? = null,
     ): Flow<Delta> = flow {
         val endpoint = baseUrl.trimEnd('/') + "/chat/completions"
@@ -78,7 +79,10 @@ class DeepSeekClient {
                     }
                 })
                 if (thinking) {
-                    put("thinking", JSONObject().put("type", "enabled"))
+                    put("thinking", JSONObject().apply {
+                        put("type", "enabled")
+                        if (thinkingBudget != null) put("budget_tokens", thinkingBudget)
+                    })
                 }
                 if (tools) {
                     put("tools", JSONArray().apply {

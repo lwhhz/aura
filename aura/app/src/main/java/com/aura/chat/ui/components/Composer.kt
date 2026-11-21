@@ -1,5 +1,7 @@
 package com.aura.chat.ui.components
 
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +65,8 @@ fun ChatComposer(
     onToggleWebSearch: () -> Unit,
     deepThinkingOn: Boolean,
     onToggleDeepThinking: () -> Unit,
+    reasoningLevel: Int,
+    onCycleReasoning: () -> Unit,
     attachmentName: String?,
     uploading: Boolean = false,
     onAttach: () -> Unit,
@@ -73,6 +77,9 @@ fun ChatComposer(
 ) {
     val accent = LocalAuraAccent.current
     val chat = LocalChatColors.current
+    var trayWidth by remember { mutableStateOf(160.dp) }
+    var barHeight by remember { mutableStateOf(56.dp) }
+    val density = LocalDensity.current
     Column(modifier.fillMaxWidth()) {
         androidx.compose.animation.AnimatedVisibility(
             visible = deepThinkingOn,
@@ -162,7 +169,7 @@ fun ChatComposer(
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(barHeight)
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -195,8 +202,10 @@ fun ChatComposer(
         }
         Spacer(Modifier.padding(top = 12.dp))
         // 输入胶囊与发送钮分离：胶囊承载模型与工具，发送钮独立，两者垂直居中
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val maxPillWidth = (maxWidth - trayWidth - 52.dp - 20.dp).coerceAtLeast(56.dp)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().onSizeChanged { barHeight = with(density) { it.height.toDp() } },
             verticalAlignment = Alignment.CenterVertically,
         ) {
         Surface(
@@ -213,11 +222,12 @@ fun ChatComposer(
                 ModelPill(
                     text = modelLabel,
                     onClick = onPickModel,
-                    modifier = Modifier.widthIn(max = 150.dp),
+                    modifier = Modifier.widthIn(max = maxPillWidth),
                 )
                 Spacer(Modifier.weight(1f))
                 // 三个动作共用一块浅色底托，视觉上成组
                 Surface(
+                    modifier = Modifier.onSizeChanged { trayWidth = with(density) { it.width.toDp() } },
                     shape = RoundedCornerShape(50),
                     color = if (dark) Color.White.copy(alpha = 0.06f) else accent.chip.copy(alpha = 0.55f),
                 ) {
@@ -232,6 +242,20 @@ fun ChatComposer(
                     size = 44.dp,
                     contentDescription = "添加附件",
                 ) { m, c -> PlusGlyph(m, c) }
+                AuraIconButton(
+                    onClick = onCycleReasoning,
+                    container = accent.chip,
+                    content = chat.onSurfaceControl,
+                    size = 44.dp,
+                    contentDescription = "推理等级：" + when (reasoningLevel) { 0 -> "低"; 2 -> "高"; else -> "中" },
+                ) { m, cb ->
+                    Icon(
+                        imageVector = Icons.Rounded.Bolt,
+                        contentDescription = null,
+                        modifier = m.size(20.dp),
+                        tint = cb,
+                    )
+                }
                 // 深度思考（官方 thinking: enabled），替代原语音入口
                 AuraIconButton(
                     onClick = onToggleDeepThinking,
@@ -281,6 +305,7 @@ fun ChatComposer(
             onClick = if (streaming) onStop else onSend,
             dark = dark,
         )
+        }
         }
     }
 }

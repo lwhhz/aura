@@ -1,5 +1,12 @@
 package com.aura.chat.ui.components
 
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.rounded.ChatBubble
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.Icons
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -110,7 +117,18 @@ fun FeaturedConversationCard(
                 )
                 Spacer(Modifier.height(22.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    AuraAvatar(accent = conversation.accent, initials = "A", size = 30.dp)
+                    Box(
+                        Modifier.size(30.dp).background(accent.chip, CircleShape),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = if (Models.of(conversation.model).id == Models.DEEPSEEK_FLASH.id) Icons.Rounded.Bolt
+                            else Icons.Rounded.ChatBubble,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = accent.onChip,
+                        )
+                    }
                     Spacer(Modifier.width(10.dp))
                     Text(
                         text = Models.of(conversation.model).label,
@@ -136,8 +154,8 @@ fun FeaturedConversationCard(
 fun ConversationCard(
     conversation: Conversation,
     onOpen: () -> Unit,
+    onDelete: () -> Unit,
     selected: Boolean = false,
-    onLongClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val accent = LocalAuraAccent.current
@@ -156,14 +174,6 @@ fun ConversationCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            AuraArt(
-                accent = conversation.accent,
-                modifier = Modifier.size(68.dp),
-                shape = RoundedCornerShape(22.dp),
-                glyph = paletteOf(conversation.accent).glyph,
-                glyphSize = 26,
-            )
-            Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
                 Text(
                     text = conversation.title,
@@ -190,6 +200,24 @@ fun ConversationCard(
                         text = relativeTime(conversation.updatedAt),
                         style = MaterialTheme.typography.labelMedium,
                         color = accent.muted,
+                    )
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            Surface(
+                onClick = onDelete,
+                modifier = Modifier
+                    .size(46.dp)
+                    .semantics { contentDescription = "删除对话" },
+                shape = RoundedCornerShape(16.dp),
+                color = accent.chip,
+                contentColor = accent.onChip,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Rounded.Delete,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp),
                     )
                 }
             }

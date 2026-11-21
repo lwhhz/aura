@@ -281,6 +281,11 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
                         apiHistory,
                         tools = useTools || pending != null,
                         thinking = settings.deepThinkingOn,
+                        thinkingBudget = if (settings.deepThinkingOn) when (settings.reasoningLevel) {
+                            0 -> 256
+                            2 -> 4096
+                            else -> 1024
+                        } else null,
                         fileId = pending?.fileId,
                     ).collect { delta ->
                         when (delta) {
