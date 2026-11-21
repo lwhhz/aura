@@ -470,9 +470,10 @@ fun ReasoningPanel(level: Int, onLevelChange: (Int) -> Unit) {
     ) {
         Column(Modifier.padding(20.dp)) {
             Text(
-                text = label,
+                // 等级已在滑块下方标注，这里只显示控件名
+                text = "推理等级",
                 style = MaterialTheme.typography.headlineSmall,
-                fontFamily = editorialFamily(label),
+                fontFamily = editorialFamily("推理等级"),
                 color = labelColor,
             )
             Spacer(Modifier.height(10.dp))
