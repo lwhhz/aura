@@ -17,8 +17,8 @@ android {
         applicationId = "com.aura.chat"
         minSdk = 26
         targetSdk = 36
-        versionCode = 41
-        versionName = "1.0.9"
+        versionCode = 42
+        versionName = "1.1.0"
     }
 
     signingConfigs {

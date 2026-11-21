@@ -1,5 +1,6 @@
 package com.aura.chat.ui.screens
 
+import androidx.compose.ui.draw.blur
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -84,6 +85,12 @@ fun ChatScreen(
     modifier: Modifier = Modifier,
 ) {
     var showToolsConsent by remember { mutableStateOf(false) }
+    var reasoningPanelOpen by remember { mutableStateOf(false) }
+    val messageBlur by androidx.compose.animation.core.animateDpAsState(
+        targetValue = if (reasoningPanelOpen) 14.dp else 0.dp,
+        animationSpec = androidx.compose.animation.core.tween(220),
+        label = "messageBlur",
+    )
     val accent = LocalAuraAccent.current
     val colors = chatColors(dark, accent, MaterialTheme.colorScheme)
     var draft by remember(conversation.id) { mutableStateOf("") }
@@ -108,7 +115,13 @@ fun ChatScreen(
                         if (settings.demoMode || !settings.hasKey) " · 演示" else " · 已连接",
                     onBack = onBack,
                 )
-                Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.TopCenter) {
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .blur(messageBlur),
+                    contentAlignment = Alignment.TopCenter,
+                ) {
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxHeight().widthIn(max = 640.dp),
@@ -167,6 +180,7 @@ fun ChatScreen(
                             onAttach = onAttach,
                             onClearAttachment = onClearAttachment,
                             onUnavailable = { feature -> onCopy(feature) },
+                        onReasoningPanelToggle = { reasoningPanelOpen = it },
                             dark = dark,
                         )
                     }

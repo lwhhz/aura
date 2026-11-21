@@ -207,9 +207,9 @@ fun ConversationCard(
             Surface(
                 onClick = onDelete,
                 modifier = Modifier
-                    .size(width = 64.dp, height = 64.dp)
+                    .size(width = 54.dp, height = 74.dp)
                     .semantics { contentDescription = "删除对话" },
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(24.dp),
                 color = accent.chip,
                 contentColor = accent.onChip,
             ) {

@@ -66,6 +66,7 @@ fun ChatComposer(
     onToggleWebSearch: () -> Unit,
     reasoningLevel: Int,
     onChangeReasoning: (Int) -> Unit,
+    onReasoningPanelToggle: (Boolean) -> Unit = {},
     attachmentName: String?,
     uploading: Boolean = false,
     onAttach: () -> Unit,
@@ -220,7 +221,11 @@ fun ChatComposer(
                     size = 44.dp,
                     contentDescription = "添加附件",
                 ) { m, c -> PlusGlyph(m, c) }
-                ReasoningLevelControl(level = reasoningLevel, onLevelChange = onChangeReasoning)
+                ReasoningLevelControl(
+                    level = reasoningLevel,
+                    onLevelChange = onChangeReasoning,
+                    onOpenChange = onReasoningPanelToggle,
+                )
                 AuraIconButton(
                     onClick = onToggleWebSearch,
                     container = when {
@@ -397,7 +402,11 @@ fun LightTopBar(
 }
 /** 推理等级：点击弹出悬浮面板，四个等级用滑块切换，颜色随强度变化。 */
 @Composable
-private fun ReasoningLevelControl(level: Int, onLevelChange: (Int) -> Unit) {
+private fun ReasoningLevelControl(
+    level: Int,
+    onLevelChange: (Int) -> Unit,
+    onOpenChange: (Boolean) -> Unit,
+) {
     val accent = LocalAuraAccent.current
     val chat = LocalChatColors.current
     var open by remember { mutableStateOf(false) }
@@ -411,7 +420,7 @@ private fun ReasoningLevelControl(level: Int, onLevelChange: (Int) -> Unit) {
     }
     Box {
         AuraIconButton(
-            onClick = { open = true },
+            onClick = { open = true; onOpenChange(true) },
             container = accent.chip,
             content = chat.onSurfaceControl,
             size = 44.dp,
@@ -427,8 +436,8 @@ private fun ReasoningLevelControl(level: Int, onLevelChange: (Int) -> Unit) {
         if (open) {
             androidx.compose.ui.window.Popup(
                 alignment = Alignment.TopCenter,
-                offset = androidx.compose.ui.unit.IntOffset(0, -with(androidx.compose.ui.platform.LocalDensity.current) { 196.dp.roundToPx() }),
-                onDismissRequest = { open = false },
+                offset = androidx.compose.ui.unit.IntOffset(0, -with(androidx.compose.ui.platform.LocalDensity.current) { 150.dp.roundToPx() }),
+                onDismissRequest = { open = false; onOpenChange(false) },
             ) {
                 Surface(
                     modifier = Modifier.width(260.dp),
