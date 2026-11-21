@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,6 +77,7 @@ fun DshDetailScreen(
     val accent = LocalAuraAccent.current
     val listState = rememberLazyListState()
     var draft by remember { mutableStateOf("") }
+    var pendingFiles by remember { mutableStateOf<List<Pair<String, ByteArray>>>(emptyList()) }
     val context = LocalContext.current
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri> ->
         if (uris.isNotEmpty()) {
@@ -84,7 +86,7 @@ fun DshDetailScreen(
                 val bytes = runCatching { context.contentResolver.openInputStream(uri)?.use { it.readBytes() } }.getOrNull()
                 if (bytes != null && bytes.size <= 20 * 1024 * 1024) name to bytes else null
             }
-            if (files.isNotEmpty()) onUploadMany(files, draft)
+            if (files.isNotEmpty()) pendingFiles = pendingFiles + files
         }
     }
 
@@ -233,6 +235,39 @@ fun DshDetailScreen(
                         color = accent.muted,
                     )
                 }
+                if (pendingFiles.isNotEmpty()) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = pendingFiles.size.toString() + " 个文件待发送",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = accent.muted,
+                        )
+                        pendingFiles.takeLast(2).forEach { (name, bytes) ->
+                            Surface(shape = RoundedCornerShape(10.dp), color = accent.chip) {
+                                Text(
+                                    text = name.take(14) + " · " + (bytes.size / 1024) + "KB",
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = accent.onChip,
+                                    maxLines = 1,
+                                )
+                            }
+                        }
+                        if (pendingFiles.size > 2) {
+                            Text("+" + (pendingFiles.size - 2), style = MaterialTheme.typography.labelSmall, color = accent.muted)
+                        }
+                        Text(
+                            text = "清除",
+                            modifier = Modifier.clickable { pendingFiles = emptyList() },
+                            style = MaterialTheme.typography.labelSmall,
+                            color = accent.deep,
+                        )
+                    }
+                }
                 Row(
                     Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -259,7 +294,12 @@ fun DshDetailScreen(
                     AuraPill(
                         text = if (sending) "…" else "发送",
                         onClick = {
-                            if (draft.isNotBlank() && !sending) {
+                            if (sending) return@AuraPill
+                            if (pendingFiles.isNotEmpty()) {
+                                onUploadMany(pendingFiles, draft.trim())
+                                draft = ""
+                                pendingFiles = emptyList()
+                            } else if (draft.isNotBlank()) {
                                 onSend(draft.trim())
                                 draft = ""
                             }
