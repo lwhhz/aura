@@ -161,6 +161,7 @@ fun AuraTag(
                 letterSpacing = 0.2.sp,
                 maxLines = 1,
                 softWrap = false,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
             )
         }
     }

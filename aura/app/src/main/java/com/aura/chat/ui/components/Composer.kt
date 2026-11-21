@@ -207,7 +207,7 @@ fun ChatComposer(
                 // 模型选择胶囊：宽度跟随右侧底托的实测宽度（等宽），底托本身保持原样
                 Box(
                     Modifier
-                        .width(136.dp)
+                        .width(if (trayWidth > 0.dp) trayWidth else 120.dp)
                         .height(48.dp),
                 ) {
                     SelectPill(
