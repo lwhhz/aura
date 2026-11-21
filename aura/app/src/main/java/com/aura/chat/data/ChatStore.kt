@@ -29,7 +29,11 @@ class ChatStore(context: Context) {
             ThemeMode.valueOf(prefs.getString(KEY_THEME, ThemeMode.SYSTEM.name) ?: ThemeMode.SYSTEM.name)
         }.getOrElse { ThemeMode.SYSTEM },
         demoMode = prefs.getBoolean(KEY_DEMO, true),
-        webSearchOn = prefs.getBoolean(KEY_WEB, true),
+        webSearchOn = prefs.getBoolean(KEY_WEB, false),
+        toolsConsent = prefs.getBoolean(KEY_TOOLS_CONSENT, false),
+        deepThinkingOn = prefs.getBoolean(KEY_DEEP_THINKING, true),
+        showNotices = prefs.getBoolean(KEY_SHOW_NOTICES, true),
+        reasoningLevel = prefs.getInt(KEY_REASONING_LEVEL, 2),
     )
 
     fun saveSettings(settings: AppSettings) {
@@ -41,6 +45,10 @@ class ChatStore(context: Context) {
             .putString(KEY_THEME, settings.themeMode.name)
             .putBoolean(KEY_DEMO, settings.demoMode)
             .putBoolean(KEY_WEB, settings.webSearchOn)
+            .putBoolean(KEY_TOOLS_CONSENT, settings.toolsConsent)
+            .putBoolean(KEY_DEEP_THINKING, settings.deepThinkingOn)
+            .putBoolean(KEY_SHOW_NOTICES, settings.showNotices)
+            .putInt(KEY_REASONING_LEVEL, settings.reasoningLevel)
             .apply()
     }
 
@@ -130,6 +138,10 @@ class ChatStore(context: Context) {
     }
 
     private companion object {
+        const val KEY_TOOLS_CONSENT = "tools_consent"
+        const val KEY_DEEP_THINKING = "deep_thinking"
+        const val KEY_SHOW_NOTICES = "show_notices"
+        const val KEY_REASONING_LEVEL = "reasoning_level"
         const val KEY_CONVERSATIONS = "conversations"
         const val KEY_API_KEY = "api_key"
         const val KEY_SEARCH_KEY = "search_key"

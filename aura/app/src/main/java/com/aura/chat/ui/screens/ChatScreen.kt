@@ -206,8 +206,9 @@ fun ChatScreen(
                         Surface(
                             onClick = { reasoningPanelOpen = false },
                             shape = RoundedCornerShape(50),
-                            color = accent.chip,
-                            contentColor = accent.onChip,
+                            // 与联网按钮“开启态”同款配色
+                            color = if (dark) accent.lemon else accent.deep,
+                            contentColor = if (dark) accent.onLemon else accent.lemon,
                             modifier = Modifier.size(with(chatDensity) { side.toDp() }),
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -215,7 +216,7 @@ fun ChatScreen(
                                     imageVector = androidx.compose.material.icons.Icons.Rounded.Bolt,
                                     contentDescription = "推理等级",
                                     modifier = Modifier.size(20.dp),
-                                    tint = accent.onChip,
+                                    tint = if (dark) accent.onLemon else accent.lemon,
                                 )
                             }
                         }
