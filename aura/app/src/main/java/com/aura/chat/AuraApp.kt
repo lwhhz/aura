@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aura.chat.data.DocumentReader
 import com.aura.chat.data.Models
 import com.aura.chat.data.ThemeMode
+import com.aura.chat.ui.screens.DshPairScreen
 import com.aura.chat.ui.screens.DshSessionsScreen
 import com.aura.chat.ui.screens.ChatScreen
 import com.aura.chat.ui.screens.HomeScreen
@@ -119,7 +120,14 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
                         onOpenSession = { session ->
                             vm.notifyUser("远程会话「" + session.title + "」详情页开发中")
                         },
-                        onPair = { vm.notifyUser("配对流程开发中：将支持二维码/令牌") },
+                        onPair = vm::openDshPair,
+                    )
+
+                    Route.DshPair -> DshPairScreen(
+                        onBack = vm::back,
+                        onConnect = { host, port, code ->
+                            vm.notifyUser("连接 " + host + ":" + port + "（配对桥待实现）")
+                        },
                     )
 
                     Route.Settings -> SettingsScreen(
