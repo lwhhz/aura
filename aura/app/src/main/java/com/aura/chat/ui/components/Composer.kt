@@ -492,7 +492,10 @@ fun ReasoningPanel(level: Int, onLevelChange: (Int) -> Unit) {
                 reasoningLabels.forEach { item ->
                     Text(
                         text = item,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = if (item == label) androidx.compose.ui.text.font.FontWeight.Bold
+                            else androidx.compose.ui.text.font.FontWeight.Normal,
+                        ),
                         color = if (item == label) labelColor else chat.muted.copy(alpha = 0.6f),
                     )
                 }
