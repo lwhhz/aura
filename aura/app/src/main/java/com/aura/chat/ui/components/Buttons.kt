@@ -231,16 +231,17 @@ fun ModelPill(
     Surface(
         onClick = onClick,
         // 高度与工具底托一致：44dp 图标 + 上下各 6dp
-        modifier = modifier.height(56.dp).widthIn(max = 160.dp),
+        modifier = modifier.height(56.dp),
         shape = CircleShape,
         color = accent.chip,
         contentColor = accent.onChip,
     ) {
         Row(
-            modifier = Modifier.fillMaxHeight().padding(horizontal = 20.dp),
+            modifier = Modifier.height(56.dp).padding(horizontal = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
         ) {
+            Box(Modifier.size(8.dp).background(accent.deep, CircleShape))
+            Spacer(Modifier.width(8.dp))
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,

@@ -22,8 +22,6 @@ import com.aura.chat.data.MessageStatus
 import com.aura.chat.data.Models
 import com.aura.chat.data.OfficialFiles
 import com.aura.chat.data.Role
-import com.aura.chat.data.SuggestionEngine
-import com.aura.chat.data.SuggestionState
 import com.aura.chat.data.ThemeMode
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -41,8 +39,6 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
 
     private val store = ChatStore(app)
     private val client = DeepSeekClient()
-    private val suggestionEngine = SuggestionEngine(client, app)
-    private var suggestionJob: Job? = null
     private var streamJob: Job? = null
 
     var settings by mutableStateOf(store.loadSettings())
@@ -63,10 +59,6 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         private set
 
     var notice by mutableStateOf<String?>(null)
-        private set
-
-    /** 首页「灵感」标签。 */
-    var suggestions by mutableStateOf(suggestionEngine.initial(emptyList()))
         private set
 
     /** 平板双栏时右侧详情选中的会话。 */
@@ -140,8 +132,6 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
             conversations = conversations.map { it.copy(model = Models.DEEPSEEK_FLASH.id) }
             persist()
         }
-        suggestions = suggestionEngine.initial(conversations)
-        scheduleSuggestions(force = false)
     }
 
     // ---------------------------------------------------------------- 置顶与灵感
@@ -160,28 +150,8 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
             notice = "已置顶"
         }
         persist()
-        scheduleSuggestions(force = false)
     }
 
-    fun refreshSuggestions(force: Boolean = true) {
-        scheduleSuggestions(force)
-    }
-
-    private fun scheduleSuggestions(force: Boolean) {
-        suggestionJob?.cancel()
-        suggestionJob = viewModelScope.launch {
-            if (!force) delay(1200)
-            suggestions = suggestions.copy(loading = true, failed = false)
-            val next = suggestionEngine.refresh(
-                baseUrl = settings.baseUrl,
-                apiKey = settings.apiKey,
-                model = Models.DEEPSEEK_FLASH.id,
-                conversations = conversations,
-                force = force,
-            )
-            suggestions = next.copy(loading = false)
-        }
-    }
 
     val recentConversations: List<Conversation>
         get() {
@@ -196,7 +166,6 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         if (route is Route.Chat && (route as Route.Chat).id == id) route = Route.Home
         if (twoPaneSelection == id) twoPaneSelection = null
         persist()
-        scheduleSuggestions(force = false)
         notice = "已删除对话"
     }
 
@@ -361,7 +330,6 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
                 finishAssistant(conv.id, elapsed)
                 streaming = false
                 persist()
-                scheduleSuggestions(force = false)
             }
         }
     }

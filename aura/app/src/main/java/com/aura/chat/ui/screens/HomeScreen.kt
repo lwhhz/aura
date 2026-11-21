@@ -48,7 +48,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.aura.chat.data.Conversation
-import com.aura.chat.data.SuggestionState
 import com.aura.chat.ui.components.AuraIconButton
 import com.aura.chat.ui.components.AuraPill
 import com.aura.chat.ui.components.AuraTag
@@ -69,13 +68,11 @@ fun HomeScreen(
     featured: Conversation?,
     recent: List<Conversation>,
     demoMode: Boolean,
-    suggestions: SuggestionState,
     onOpen: (String) -> Unit,
     onNewChat: () -> Unit,
     onQuickStart: (String) -> Unit,
     onSettings: () -> Unit,
     onTogglePin: (String) -> Unit,
-    onRefreshSuggestions: () -> Unit,
     onDelete: (String) -> Unit,
     selectedConversationId: String? = null,
     contentMaxWidth: androidx.compose.ui.unit.Dp = 560.dp,
@@ -163,71 +160,6 @@ fun HomeScreen(
                                 onOpen = { onOpen(conversation.id) },
                                 onTogglePin = { onTogglePin(conversation.id) },
                             )
-                        }
-                    }
-                }
-
-                item(key = "suggestions") {
-                    Column {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Eyebrow("灵感 · 从最近的对话来", color = accent.onChip)
-                            Spacer(Modifier.weight(1f))
-                            Text(
-                                text = if (suggestions.fromModel) "模型总结" else "本地摘要",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = accent.muted,
-                            )
-                        }
-                        Spacer(Modifier.height(10.dp))
-                        when {
-                            suggestions.loading && suggestions.items.isEmpty() -> {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    repeat(3) { index ->
-                                        Box(
-                                            Modifier
-                                                .height(52.dp)
-                                                .widthIn(min = 96.dp)
-                                                .background(accent.chip.copy(alpha = 0.55f), CircleShape)
-                                        )
-                                    }
-                                }
-                            }
-                            suggestions.items.isEmpty() -> {
-                                AuraPill(
-                                    text = if (suggestions.failed) "换个灵感" else "生成灵感",
-                                    onClick = onRefreshSuggestions,
-                                    style = PillStyle.Soft,
-                                )
-                            }
-                            else -> {
-                                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    // 灵感标签暂不接行为（用户还在构思），只作为展示 chip
-                                    items(suggestions.items, key = { it.label + it.conversationId }) { item ->
-                                        Surface(
-                                            onClick = { onOpenSuggestion(item.conversationId) },
-                                            shape = CircleShape,
-                                            color = accent.chip,
-                                            contentColor = accent.onChip,
-                                        ) {
-                                            Row(
-                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 13.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            ) {
-                                                Box(Modifier.size(12.dp).background(accent.deep, CircleShape))
-                                                Text(
-                                                    text = item.label,
-                                                    style = MaterialTheme.typography.labelLarge,
-                                                    maxLines = 1,
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 }

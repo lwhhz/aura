@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -158,7 +159,13 @@ fun ChatComposer(
             color = chat.surface,
             contentColor = chat.text,
         ) {
-            Column(Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 14.dp)) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.Center,
+            ) {
                 BasicTextField(
                     value = value,
                     onValueChange = onValueChange,
@@ -202,8 +209,12 @@ fun ChatComposer(
                 modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // 独立组件：宽度只由自身内容决定，不受底托影响
-                ModelPill(text = modelLabel, onClick = onPickModel)
+                // 独立组件：内容自适应；最多占一半空间，离底托至少 6dp
+                ModelPill(
+                    text = modelLabel,
+                    onClick = onPickModel,
+                    modifier = Modifier.widthIn(max = 150.dp),
+                )
                 Spacer(Modifier.weight(1f))
                 // 三个动作共用一块浅色底托，视觉上成组
                 Surface(

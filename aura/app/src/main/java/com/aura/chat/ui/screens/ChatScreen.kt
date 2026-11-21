@@ -172,6 +172,32 @@ fun ChatScreen(
                     }
                 }
             }
+
+            if (showToolsConsent) {
+                AlertDialog(
+                    onDismissRequest = { showToolsConsent = false },
+                    title = { Text("开启官方联网工具？", style = MaterialTheme.typography.headlineSmall) },
+                    text = {
+                        Text(
+                            "联网检索由 DeepSeek 服务端完成，模型会切换到 deepseek-flash；" +
+                                "搜索、阅读链接与文件解析按官方价格额外计费。",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showToolsConsent = false
+                            onConsentTools()
+                            onToggleWebSearch()
+                        }) { Text("同意并开启") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showToolsConsent = false }) { Text("取消") }
+                    },
+                    shape = RoundedCornerShape(30.dp),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                )
+            }
         }
     }
 }
