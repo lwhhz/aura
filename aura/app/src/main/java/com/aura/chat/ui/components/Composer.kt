@@ -1,5 +1,7 @@
 package com.aura.chat.ui.components
 
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.window.Popup
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -67,6 +69,7 @@ fun ChatComposer(
     reasoningLevel: Int,
     onChangeReasoning: (Int) -> Unit,
     onReasoningPanelToggle: (Boolean) -> Unit = {},
+    onBoltBounds: (androidx.compose.ui.geometry.Rect) -> Unit = {},
     attachmentName: String?,
     uploading: Boolean = false,
     onAttach: () -> Unit,
@@ -225,6 +228,7 @@ fun ChatComposer(
                     level = reasoningLevel,
                     onOpenChange = onReasoningPanelToggle,
                     onChange = onChangeReasoning,
+                    onBounds = onBoltBounds,
                 )
                 AuraIconButton(
                     onClick = onToggleWebSearch,
@@ -402,13 +406,18 @@ fun LightTopBar(
 }
 /** 推理等级按钮：Popup 真正锚定在按钮上方，外层整页模糊不影响 Popup 窗口。 */
 @Composable
-private fun ReasoningLevelControl(level: Int, onOpenChange: (Boolean) -> Unit, onChange: (Int) -> Unit) {
+private fun ReasoningLevelControl(
+    level: Int,
+    onOpenChange: (Boolean) -> Unit,
+    onChange: (Int) -> Unit,
+    onBounds: (androidx.compose.ui.geometry.Rect) -> Unit,
+) {
     val accent = LocalAuraAccent.current
     val chat = LocalChatColors.current
     var open by remember { mutableStateOf(false) }
     val label = reasoningLabels[level.coerceIn(0, 3)]
     val density = LocalDensity.current
-    Box {
+    Box(Modifier.onGloballyPositioned { onBounds(it.boundsInWindow()) }) {
         AuraIconButton(
             onClick = { open = true; onOpenChange(true) },
             container = accent.chip,

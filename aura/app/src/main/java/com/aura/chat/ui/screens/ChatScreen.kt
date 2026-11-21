@@ -1,5 +1,12 @@
 package com.aura.chat.ui.screens
 
+import kotlin.math.roundToInt
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Icon
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.blur
@@ -88,6 +95,8 @@ fun ChatScreen(
 ) {
     var showToolsConsent by remember { mutableStateOf(false) }
     var reasoningPanelOpen by remember { mutableStateOf(false) }
+    var boltBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    val chatDensity = androidx.compose.ui.platform.LocalDensity.current
     val contentBlur by androidx.compose.animation.core.animateDpAsState(
         targetValue = if (reasoningPanelOpen) 14.dp else 0.dp,
         animationSpec = androidx.compose.animation.core.tween(220),
@@ -178,11 +187,40 @@ fun ChatScreen(
                             onClearAttachment = onClearAttachment,
                             onUnavailable = { feature -> onCopy(feature) },
                         onReasoningPanelToggle = { reasoningPanelOpen = it },
+                        onBoltBounds = { boltBounds = it },
                             dark = dark,
                         )
                     }
                 }
             }
+            }
+
+            if (reasoningPanelOpen) {
+                boltBounds?.let { rect ->
+                    val side = with(chatDensity) { 44.dp.roundToPx() }
+                    Box(
+                        Modifier
+                            .offset { androidx.compose.ui.unit.IntOffset(rect.left.roundToInt(), rect.top.roundToInt()) }
+                            .size(with(chatDensity) { side.toDp() }),
+                    ) {
+                        Surface(
+                            onClick = { reasoningPanelOpen = false },
+                            shape = RoundedCornerShape(50),
+                            color = accent.chip,
+                            contentColor = accent.onChip,
+                            modifier = Modifier.size(with(chatDensity) { side.toDp() }),
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = androidx.compose.material.icons.Icons.Rounded.Bolt,
+                                    contentDescription = "推理等级",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = accent.onChip,
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             if (showToolsConsent) {
