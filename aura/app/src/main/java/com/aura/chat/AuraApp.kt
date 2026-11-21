@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aura.chat.data.DocumentReader
 import com.aura.chat.data.Models
 import com.aura.chat.data.ThemeMode
+import com.aura.chat.ui.screens.DshSessionsScreen
 import com.aura.chat.ui.screens.ChatScreen
 import com.aura.chat.ui.screens.HomeScreen
 import com.aura.chat.ui.screens.ModelSheet
@@ -104,14 +105,21 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
                         featured = vm.featuredConversation,
                         recent = vm.recentConversations,
                         demoMode = vm.settings.demoMode || !vm.settings.hasKey,
-                        suggestions = vm.suggestions,
                         onOpen = vm::openConversation,
                         onNewChat = vm::newConversation,
                         onQuickStart = vm::startWithPrompt,
                         onSettings = vm::openSettings,
                         onTogglePin = vm::togglePin,
-                        onRefreshSuggestions = { vm.refreshSuggestions(true) },
                         onDelete = vm::deleteConversation,
+                        onOpenDsh = vm::openDshSessions,
+                    )
+
+                    Route.DshSessions -> DshSessionsScreen(
+                        onBack = vm::back,
+                        onOpenSession = { session ->
+                            vm.notifyUser("远程会话「" + session.title + "」详情页开发中")
+                        },
+                        onPair = { vm.notifyUser("配对流程开发中：将支持二维码/令牌") },
                     )
 
                     Route.Settings -> SettingsScreen(
@@ -143,9 +151,7 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
                                 onToggleWebSearch = {
                                     vm.updateSettings { it.copy(webSearchOn = !it.webSearchOn) }
                                 },
-                                onToggleDeepThinking = {
-                                    vm.updateSettings { it.copy(deepThinkingOn = !it.deepThinkingOn) }
-                                },
+                                onChangeReasoning = { level -> vm.updateSettings { it.copy(reasoningLevel = level) } },
                                 onConsentTools = { vm.updateSettings { it.copy(toolsConsent = true) } },
                                 attachmentName = vm.pendingFile?.name,
                                 uploading = vm.uploadingFile,
@@ -207,7 +213,6 @@ private fun AdaptiveTwoPane(
                     featured = vm.featuredConversation,
                     recent = vm.recentConversations,
                     demoMode = vm.settings.demoMode || !vm.settings.hasKey,
-                    suggestions = vm.suggestions,
                     onOpen = { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } },
                     onNewChat = {
                         vm.newConversation()
@@ -218,8 +223,8 @@ private fun AdaptiveTwoPane(
                     onQuickStart = vm::startWithPrompt,
                     onSettings = vm::openSettings,
                     onTogglePin = vm::togglePin,
-                    onRefreshSuggestions = { vm.refreshSuggestions(true) },
                         onDelete = vm::deleteConversation,
+                        onOpenDsh = vm::openDshSessions,
                     selectedConversationId = selectedId,
                     contentMaxWidth = 340.dp,
                     onOpenSuggestion = { id -> scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, id) } },
@@ -244,9 +249,7 @@ private fun AdaptiveTwoPane(
                         onToggleWebSearch = {
                             vm.updateSettings { it.copy(webSearchOn = !it.webSearchOn) }
                         },
-                        onToggleDeepThinking = {
-                            vm.updateSettings { it.copy(deepThinkingOn = !it.deepThinkingOn) }
-                        },
+                        onChangeReasoning = { level -> vm.updateSettings { it.copy(reasoningLevel = level) } },
                         onConsentTools = { vm.updateSettings { it.copy(toolsConsent = true) } },
                         attachmentName = vm.pendingFile?.name,
                         uploading = vm.uploadingFile,

@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import com.aura.chat.data.Conversation
+import com.aura.chat.ui.components.DshDock
 import com.aura.chat.ui.components.AuraIconButton
 import com.aura.chat.ui.components.AuraPill
 import com.aura.chat.ui.components.AuraTag
@@ -73,6 +74,7 @@ fun HomeScreen(
     onQuickStart: (String) -> Unit,
     onSettings: () -> Unit,
     onTogglePin: (String) -> Unit,
+    onOpenDsh: () -> Unit,
     onDelete: (String) -> Unit,
     selectedConversationId: String? = null,
     contentMaxWidth: androidx.compose.ui.unit.Dp = 560.dp,
@@ -234,12 +236,15 @@ fun HomeScreen(
                 )
             }
 
-            Box(
+            Column(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
                     .padding(end = 20.dp, bottom = 20.dp),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                DshDock(onOpen = onOpenDsh)
                 NewChatDock(onNewChat = onNewChat)
             }
         }

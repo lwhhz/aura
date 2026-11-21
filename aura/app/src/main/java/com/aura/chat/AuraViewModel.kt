@@ -33,6 +33,7 @@ sealed interface Route {
     data object Home : Route
     data class Chat(val id: String) : Route
     data object Settings : Route
+    data object DshSessions : Route
 }
 
 class AuraViewModel(app: Application) : AndroidViewModel(app) {
@@ -195,8 +196,13 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
         route = when (route) {
             is Route.Chat -> Route.Home
             Route.Settings -> Route.Home
+            Route.DshSessions -> Route.Home
             Route.Home -> Route.Home
         }
+    }
+
+    fun openDshSessions() {
+        route = Route.DshSessions
     }
 
     fun openSettings() { route = Route.Settings }

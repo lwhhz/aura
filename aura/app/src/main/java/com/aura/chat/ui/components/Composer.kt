@@ -1,5 +1,6 @@
 package com.aura.chat.ui.components
 
+import androidx.compose.material.icons.rounded.Computer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.window.Popup
@@ -497,6 +498,48 @@ fun ReasoningPanel(level: Int, onLevelChange: (Int) -> Unit) {
                             else androidx.compose.ui.text.font.FontWeight.Normal,
                         ),
                         color = if (item == label) labelColor else chat.muted.copy(alpha = 0.6f),
+                    )
+                }
+            }
+        }
+    }
+}
+/** 首页第二个入口：进入 DSH 远程会话列表，样式与「新的对话」一致。 */
+@Composable
+fun DshDock(onOpen: () -> Unit, modifier: Modifier = Modifier) {
+    val accent = LocalAuraAccent.current
+    Surface(
+        onClick = onOpen,
+        modifier = modifier,
+        shape = CircleShape,
+        color = accent.deep,
+        contentColor = accent.onDeep,
+        shadowElevation = 16.dp,
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 22.dp, end = 8.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = "DSH",
+                style = MaterialTheme.typography.labelLarge,
+                color = accent.onDeep,
+                maxLines = 1,
+                softWrap = false,
+            )
+            Spacer(Modifier.width(14.dp))
+            Surface(
+                modifier = Modifier.size(46.dp),
+                shape = CircleShape,
+                color = accent.lemon,
+                contentColor = accent.onLemon,
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = androidx.compose.material.icons.Icons.Rounded.Computer,
+                        contentDescription = null,
+                        modifier = Modifier.size(22.dp),
+                        tint = accent.onLemon,
                     )
                 }
             }
