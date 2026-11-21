@@ -127,22 +127,25 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
                         onPair = vm::openDshPair,
                     )
 
-                    is Route.DshDetail -> DshDetailScreen(
-                        peer = vm.dshPeer,
-                        sessionId = (route as Route.DshDetail).id,
-                        detail = vm.dshDetail,
-                        loading = vm.dshDetailLoading,
-                        error = vm.dshDetailError,
-                        onBack = vm::back,
-                        onRefresh = { vm.loadDshDetail((route as Route.DshDetail).id) },
-                        maxTurns = vm.settings.detailMaxTurns,
-                        maxItems = vm.settings.detailMaxItems,
-                        sending = vm.dshSending,
-                        uploadProgress = vm.dshUploadProgress,
-                        sendError = vm.dshSendError,
-                        onSend = { text -> vm.dshSend((route as Route.DshDetail).id, text) },
-                        onUploadMany = { files, text -> vm.dshUploadManyAndSend((route as Route.DshDetail).id, files, text) },
-                    )
+                    is Route.DshDetail -> {
+                        val detailSessionId = target.id
+                        DshDetailScreen(
+                            peer = vm.dshPeer,
+                            sessionId = detailSessionId,
+                            detail = vm.dshDetail,
+                            loading = vm.dshDetailLoading,
+                            error = vm.dshDetailError,
+                            onBack = vm::back,
+                            onRefresh = { vm.loadDshDetail(detailSessionId) },
+                            maxTurns = vm.settings.detailMaxTurns,
+                            maxItems = vm.settings.detailMaxItems,
+                            sending = vm.dshSending,
+                            uploadProgress = vm.dshUploadProgress,
+                            sendError = vm.dshSendError,
+                            onSend = { text -> vm.dshSend(detailSessionId, text) },
+                            onUploadMany = { files, text -> vm.dshUploadManyAndSend(detailSessionId, files, text) },
+                        )
+                    }
 
                     Route.DshPair -> DshPairScreen(
                         onBack = vm::back,

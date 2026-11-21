@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,6 +79,12 @@ fun DshDetailScreen(
     val listState = rememberLazyListState()
     var draft by remember { mutableStateOf("") }
     var pendingFiles by remember { mutableStateOf<List<Pair<String, ByteArray>>>(emptyList()) }
+    val keyboard = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+    val inputInteraction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+    val inputFocused by inputInteraction.collectIsFocusedAsState()
+    LaunchedEffect(inputFocused) {
+        if (inputFocused) keyboard?.show()
+    }
     val context = LocalContext.current
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris: List<Uri> ->
         if (uris.isNotEmpty()) {
@@ -281,6 +288,7 @@ fun DshDetailScreen(
                         modifier = Modifier.weight(1f),
                         placeholder = { Text(uploadProgress ?: if (sending) "正在发送…" else "发消息给这台电脑", style = MaterialTheme.typography.bodyMedium) },
                         shape = RoundedCornerShape(20.dp),
+                        interactionSource = inputInteraction,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = accent.card,
                             unfocusedContainerColor = accent.card,
