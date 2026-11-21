@@ -1,6 +1,14 @@
 package com.aura.chat.ui.screens
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
 import androidx.compose.foundation.background
@@ -64,6 +72,19 @@ fun DshPairScreen(
     var manualHost by remember { mutableStateOf("") }
     var manualPort by remember { mutableStateOf("8765") }
     var code by remember { mutableStateOf("") }
+    val permission = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.NEARBY_WIFI_DEVICES else Manifest.permission.ACCESS_FINE_LOCATION
+    var permissionGranted by remember {
+        mutableStateOf(
+            Build.VERSION.SDK_INT < 33 ||
+                ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        permissionGranted = it
+    }
+    LaunchedEffect(Unit) {
+        if (!permissionGranted) permissionLauncher.launch(permission)
+    }
 
     DisposableEffect(Unit) {
         val listener = object : NsdManager.DiscoveryListener {
@@ -117,6 +138,30 @@ fun DshPairScreen(
                             style = MaterialTheme.typography.bodyMedium,
                             color = accent.muted,
                         )
+                    }
+                }
+                if (!permissionGranted) {
+                    item(key = "perm") {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(24.dp),
+                            color = accent.lemon,
+                            contentColor = accent.onLemon,
+                        ) {
+                            Column(Modifier.padding(18.dp)) {
+                                Text(
+                                    "需要「附近设备」权限才能扫描局域网",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = accent.onLemon,
+                                )
+                                Spacer(Modifier.height(10.dp))
+                                AuraPill(
+                                    text = "授予权限",
+                                    onClick = { permissionLauncher.launch(permission) },
+                                    style = PillStyle.Deep,
+                                )
+                            }
+                        }
                     }
                 }
                 item(key = "found-title") {
