@@ -91,6 +91,60 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     var dshDetailError by mutableStateOf<String?>(null)
         private set
 
+    var dshSending by mutableStateOf(false)
+        private set
+    var dshSendError by mutableStateOf<String?>(null)
+        private set
+    var dshUploadProgress by mutableStateOf<String?>(null)
+        private set
+
+    fun dshSend(id: String, text: String) {
+        val peer = dshPeer ?: return
+        if (text.isBlank()) return
+        viewModelScope.launch {
+            dshSending = true
+            dshSendError = null
+            runCatching { DshClient.send(peer.host, peer.port, peer.token, id, text) }
+                .onFailure { dshSendError = it.message ?: "发送失败" }
+            dshSending = false
+        }
+    }
+
+    fun dshUploadManyAndSend(id: String, files: List<Pair<String, ByteArray>>, text: String) {
+        val peer = dshPeer ?: return
+        if (files.isEmpty()) { dshSend(id, text); return }
+        viewModelScope.launch {
+            dshSending = true
+            dshSendError = null
+            val paths = mutableListOf<String>()
+            runCatching {
+                files.forEachIndexed { index, (name, bytes) ->
+                    dshUploadProgress = "上传 " + (index + 1) + "/" + files.size + " · " + name
+                    paths += DshClient.upload(peer.host, peer.port, peer.token, id, name, bytes)
+                }
+                dshUploadProgress = null
+                val suffix = paths.joinToString("\n") { "已上传文件：" + it }
+                DshClient.send(peer.host, peer.port, peer.token, id, if (text.isBlank()) suffix else text + "\n\n" + suffix)
+            }.onFailure { dshSendError = it.message ?: "上传失败" }
+            dshUploadProgress = null
+            dshSending = false
+        }
+    }
+
+    fun dshUploadAndSend(id: String, name: String, bytes: ByteArray, text: String) {
+        val peer = dshPeer ?: return
+        viewModelScope.launch {
+            dshSending = true
+            dshSendError = null
+            runCatching {
+                val path = DshClient.upload(peer.host, peer.port, peer.token, id, name, bytes)
+                val prompt = if (text.isBlank()) "已上传文件：" + path else text + "\n\n已上传文件：" + path
+                DshClient.send(peer.host, peer.port, peer.token, id, prompt)
+            }.onFailure { dshSendError = it.message ?: "上传失败" }
+            dshSending = false
+        }
+    }
+
     fun loadDshDetail(id: String) {
         val peer = dshPeer ?: return
         viewModelScope.launch {

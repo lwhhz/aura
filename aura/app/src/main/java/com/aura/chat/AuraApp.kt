@@ -128,6 +128,7 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
                     )
 
                     is Route.DshDetail -> DshDetailScreen(
+                        peer = vm.dshPeer,
                         sessionId = (route as Route.DshDetail).id,
                         detail = vm.dshDetail,
                         loading = vm.dshDetailLoading,
@@ -136,6 +137,11 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
                         onRefresh = { vm.loadDshDetail((route as Route.DshDetail).id) },
                         maxTurns = vm.settings.detailMaxTurns,
                         maxItems = vm.settings.detailMaxItems,
+                        sending = vm.dshSending,
+                        uploadProgress = vm.dshUploadProgress,
+                        sendError = vm.dshSendError,
+                        onSend = { text -> vm.dshSend((route as Route.DshDetail).id, text) },
+                        onUploadMany = { files, text -> vm.dshUploadManyAndSend((route as Route.DshDetail).id, files, text) },
                     )
 
                     Route.DshPair -> DshPairScreen(

@@ -13,6 +13,50 @@ data class DshSessionDetail(val id: String, val title: String, val cwd: String, 
 data class DshRemoteSession(val id: String, val title: String, val cwd: String, val createdAt: Long)
 
 object DshClient {
+    /** 发送一条文本消息到会话。 */
+    suspend fun send(host: String, port: Int, token: String, id: String, text: String) =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val conn = (URL("http://" + host + ":" + port + "/aura/send").openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                doOutput = true
+                connectTimeout = 6000
+                readTimeout = 15000
+                setRequestProperty("content-type", "application/json")
+                setRequestProperty("x-aura-token", token)
+            }
+            try {
+                conn.outputStream.use {
+                    it.write(JSONObject().put("id", id).put("text", text).toString().toByteArray())
+                }
+                val textBody = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)?.bufferedReader()?.readText().orEmpty()
+                if (conn.responseCode !in 200..299) throw IOException("发送失败（" + conn.responseCode + "）" + textBody.take(120))
+            } finally { conn.disconnect() }
+        }
+
+    /** 上传文件到会话 cwd/aura-uploads，返回落盘路径。 */
+    suspend fun upload(host: String, port: Int, token: String, id: String, name: String, bytes: ByteArray): String =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val payload = JSONObject()
+                .put("id", id)
+                .put("name", name)
+                .put("data", android.util.Base64.encodeToString(bytes, android.util.Base64.NO_WRAP))
+                .toString()
+            val conn = (URL("http://" + host + ":" + port + "/aura/upload").openConnection() as HttpURLConnection).apply {
+                requestMethod = "POST"
+                doOutput = true
+                connectTimeout = 8000
+                readTimeout = 60000
+                setRequestProperty("content-type", "application/json")
+                setRequestProperty("x-aura-token", token)
+            }
+            try {
+                conn.outputStream.use { it.write(payload.toByteArray()) }
+                val textBody = (if (conn.responseCode in 200..299) conn.inputStream else conn.errorStream)?.bufferedReader()?.readText().orEmpty()
+                if (conn.responseCode !in 200..299) throw IOException("上传失败（" + conn.responseCode + "）" + textBody.take(120))
+                JSONObject(textBody).optString("path")
+            } finally { conn.disconnect() }
+        }
+
     /** 拉取单个会话的消息。 */
     suspend fun detail(host: String, port: Int, token: String, id: String): DshSessionDetail =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {

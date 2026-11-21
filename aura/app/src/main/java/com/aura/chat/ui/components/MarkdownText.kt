@@ -46,6 +46,11 @@ import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
 
+/** 图片鉴权：手机端通过 sidecar 读取电脑本地图片。 */
+data class MarkdownImageAuth(val baseUrl: String, val token: String)
+
+val LocalMarkdownImageAuth = androidx.compose.runtime.staticCompositionLocalOf<MarkdownImageAuth?> { null }
+
 /** 轻量 Markdown：标题、代码块、表格、图片、行内代码/粗体/斜体/删除线/可点击链接、列表。 */
 @Composable
 fun MarkdownText(text: String, modifier: Modifier = Modifier, color: Color = LocalAuraAccent.current.text) {
@@ -311,16 +316,29 @@ private fun MarkdownTable(header: List<String>, rows: List<List<String>>, color:
 }
 
 @Composable
-private fun MarkdownImage(alt: String, url: String) {
+private fun MarkdownImage(alt: String, rawUrl: String) {
     val accent = LocalAuraAccent.current
-    val bitmap by produceState<androidx.compose.ui.graphics.ImageBitmap?>(initialValue = null, url) {
+    val auth = LocalMarkdownImageAuth.current
+    val url = rawUrl.trim().substringBefore(" \"").trim()
+    val path = if (url.startsWith("file://")) url.removePrefix("file://") else url
+    val remote = when {
+        url.startsWith("http://") || url.startsWith("https://") -> url
+        auth != null -> auth.baseUrl + "/aura/file?path=" + java.net.URLEncoder.encode(path, "UTF-8") + "&token=" + auth.token
+        else -> null
+    }
+    val localPath = if (remote == null) path else null
+    val bitmap by produceState<androidx.compose.ui.graphics.ImageBitmap?>(initialValue = null, remote, localPath) {
         value = withContext(Dispatchers.IO) {
             runCatching {
-                val connection = (URL(url).openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 6000
-                    readTimeout = 10000
-                }
-                connection.inputStream.use { BitmapFactory.decodeStream(it)?.asImageBitmap() }
+                if (remote != null) {
+                    val connection = (URL(remote).openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 6000
+                        readTimeout = 15000
+                    }
+                    connection.inputStream.use { BitmapFactory.decodeStream(it)?.asImageBitmap() }
+                } else if (localPath != null) {
+                    java.io.File(localPath).takeIf { it.isFile }?.inputStream()?.use { BitmapFactory.decodeStream(it)?.asImageBitmap() }
+                } else null
             }.getOrNull()
         }
     }

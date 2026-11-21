@@ -299,7 +299,7 @@ fun SettingsScreen(
                     }
 
                     item {
-                        SettingsCard(eyebrow = "关于", title = "Aura 1.6.0") {
+                        SettingsCard(eyebrow = "关于", title = "Aura 1.6.4") {
                             Text(
                                 text = "Aura 是 DeepSeek 官方开源 chat-demo（MIT）的 Android 复刻：界面按 Material 3 Expressive 与薰衣草编辑风重新设计，对话能力接入官方 chat/completions。" +
                                     "联网检索、深度思考与文件解析均为官方服务端工具，调用会按官方价格额外计费。" +
