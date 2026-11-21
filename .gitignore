@@ -24,3 +24,6 @@ dist/
 aura/screenshots/
 fonts/
 release-body.json
+# DSH plugin scaffold: kept local, will go to a separate public repo
+dsh-plugin/
+docs/dsh-plugin-plan.md
