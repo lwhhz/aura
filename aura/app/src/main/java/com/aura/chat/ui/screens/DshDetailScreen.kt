@@ -73,6 +73,9 @@ fun DshDetailScreen(
     }.takeLast(minOf(maxTurns * 2, maxItems))
     val last = all.lastOrNull()
     val processing = last != null && last.role !in setOf("user", "assistant")
+    val turnStart = all.indexOfLast { it.role == "user" }
+    val steps = if (turnStart >= 0) all.drop(turnStart).count { it.role == "tool" } else 0
+    val stepSuffix = if (steps > 0) " · 第 " + steps + " 步" else ""
     val statusText = when (last?.role) {
         "tool" -> "正在调用 " + last.name.ifBlank { "工具" } + "…"
         "tool_result" -> "工具已返回，继续处理…"
@@ -125,7 +128,7 @@ fun DshDetailScreen(
                 ) {
                     Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                     Text(
-                        text = "● " + statusText,
+                        text = "● " + statusText + stepSuffix,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                         style = MaterialTheme.typography.labelMedium,
                         color = accent.muted,

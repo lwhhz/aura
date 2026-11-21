@@ -1,12 +1,14 @@
 package com.aura.chat.ui.components
 
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -19,23 +21,32 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.aura.chat.ui.theme.LocalAuraAccent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
 
-/**
- * 轻量 Markdown 渲染：标题、代码块、行内代码、粗体、斜体、删除线、有序/无序列表。
- * 不引入第三方依赖，覆盖 DSH 输出的常见格式。
- */
+/** 轻量 Markdown：标题、代码块、表格、图片、行内代码/粗体/斜体/删除线/可点击链接、列表。 */
 @Composable
 fun MarkdownText(text: String, modifier: Modifier = Modifier, color: Color = LocalAuraAccent.current.text) {
     val accent = LocalAuraAccent.current
@@ -43,11 +54,7 @@ fun MarkdownText(text: String, modifier: Modifier = Modifier, color: Color = Loc
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         for (block in blocks) {
             when (block) {
-                is MdBlock.Code -> Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = accent.chip,
-                    contentColor = accent.onChip,
-                ) {
+                is MdBlock.Code -> Surface(shape = RoundedCornerShape(12.dp), color = accent.chip) {
                     Text(
                         text = block.text,
                         modifier = Modifier.padding(12.dp),
@@ -56,7 +63,7 @@ fun MarkdownText(text: String, modifier: Modifier = Modifier, color: Color = Loc
                     )
                 }
                 is MdBlock.Heading -> Text(
-                    text = inlineMarkdown(block.text, color, accent.onChip, accent.deep),
+                    text = inlineMarkdown(block.text, color, accent.deep),
                     style = when (block.level) {
                         1 -> MaterialTheme.typography.titleLarge
                         2 -> MaterialTheme.typography.titleMedium
@@ -66,14 +73,16 @@ fun MarkdownText(text: String, modifier: Modifier = Modifier, color: Color = Loc
                 )
                 is MdBlock.Bullet -> Row {
                     Text("·  ", style = MaterialTheme.typography.bodyMedium, color = accent.muted)
-                    Text(inlineMarkdown(block.text, color, accent.onChip, accent.deep), style = MaterialTheme.typography.bodyMedium)
+                    Text(inlineMarkdown(block.text, color, accent.deep), style = MaterialTheme.typography.bodyMedium)
                 }
                 is MdBlock.Ordered -> Row {
                     Text(block.marker + "  ", style = MaterialTheme.typography.bodyMedium, color = accent.muted)
-                    Text(inlineMarkdown(block.text, color, accent.onChip, accent.deep), style = MaterialTheme.typography.bodyMedium)
+                    Text(inlineMarkdown(block.text, color, accent.deep), style = MaterialTheme.typography.bodyMedium)
                 }
+                is MdBlock.Image -> MarkdownImage(block.alt, block.url)
+                is MdBlock.Table -> MarkdownTable(block.header, block.rows, color)
                 is MdBlock.Paragraph -> Text(
-                    text = inlineMarkdown(block.text, color, accent.onChip, accent.deep),
+                    text = inlineMarkdown(block.text, color, accent.deep),
                     style = MaterialTheme.typography.bodyMedium,
                     color = color,
                 )
@@ -88,6 +97,46 @@ private sealed interface MdBlock {
     data class Code(val text: String) : MdBlock
     data class Bullet(val text: String) : MdBlock
     data class Ordered(val marker: String, val text: String) : MdBlock
+    data class Image(val alt: String, val url: String) : MdBlock
+    data class Table(val header: List<String>, val rows: List<List<String>>) : MdBlock
+}
+
+private fun isTableSeparator(line: String): Boolean {
+    val cells = line.trim().trim('|').split("|")
+    if (cells.isEmpty()) return false
+    return cells.all { cell ->
+        val core = cell.trim().trim(':')
+        core.length >= 3 && core.all { it == '-' }
+    }
+}
+
+private fun parseImage(line: String): Pair<String, String>? {
+    if (!line.startsWith("![")) return null
+    val close = line.indexOf("](", 2)
+    if (close < 0 || !line.endsWith(")")) return null
+    return line.substring(2, close) to line.substring(close + 2, line.length - 1)
+}
+
+private fun headingLevel(line: String): Pair<Int, String>? {
+    val hashes = line.takeWhile { it == '#' }.length
+    if (hashes == 0 || hashes > 6) return null
+    if (line.getOrNull(hashes) != ' ') return null
+    return hashes to line.substring(hashes + 1).trim()
+}
+
+private fun bulletText(line: String): String? {
+    if (line.startsWith("- ") || line.startsWith("* ")) return line.substring(2).trim()
+    return null
+}
+
+private fun orderedText(line: String): Pair<String, String>? {
+    var digits = 0
+    while (digits < line.length && line[digits].isDigit()) digits++
+    if (digits == 0) return null
+    val marker = line.substring(0, digits)
+    val next = line.getOrNull(digits) ?: return null
+    if ((next != '.' && next != ')') || line.getOrNull(digits + 1) != ' ') return null
+    return marker + next to line.substring(digits + 2).trim()
 }
 
 private fun parseMarkdownBlocks(source: String): List<MdBlock> {
@@ -96,51 +145,89 @@ private fun parseMarkdownBlocks(source: String): List<MdBlock> {
     var inCode = false
     val code = StringBuilder()
     val paragraph = StringBuilder()
+
     fun flushParagraph() {
         if (paragraph.isNotBlank()) blocks.add(MdBlock.Paragraph(paragraph.toString().trim()))
         paragraph.clear()
     }
-    for (line in lines) {
-        val trimmed = line.trim()
+
+    var index = 0
+    while (index < lines.size) {
+        val raw = lines[index]
+        val trimmed = raw.trim()
         if (trimmed.startsWith("```")) {
-            if (inCode) {
-                blocks.add(MdBlock.Code(code.toString().trimEnd()))
-                code.clear()
-            } else {
-                flushParagraph()
-            }
+            if (inCode) { blocks.add(MdBlock.Code(code.toString().trimEnd())); code.clear() } else flushParagraph()
             inCode = !inCode
+            index++
             continue
         }
-        if (inCode) { code.appendLine(line); continue }
-        val heading = Regex("^(#{1,6})\\s+(.*)$").find(trimmed)
-        val bullet = Regex("^[-*]\\s+(.*)$").find(trimmed)
-        val ordered = Regex("^(\\d+[.)])\\s+(.*)$").find(trimmed)
+        if (inCode) { code.appendLine(raw); index++; continue }
+
+        if (trimmed.startsWith("|") && index + 1 < lines.size && isTableSeparator(lines[index + 1])) {
+            flushParagraph()
+            val header = splitRow(trimmed)
+            val rows = mutableListOf<List<String>>()
+            var cursor = index + 2
+            while (cursor < lines.size && lines[cursor].trim().startsWith("|")) {
+                rows.add(splitRow(lines[cursor].trim()))
+                cursor++
+            }
+            blocks.add(MdBlock.Table(header, rows))
+            index = cursor
+            continue
+        }
+
+        val image = parseImage(trimmed)
+        if (image != null) {
+            flushParagraph()
+            blocks.add(MdBlock.Image(image.first, image.second))
+            index++
+            continue
+        }
+
+        val heading = headingLevel(trimmed)
+        val bullet = bulletText(trimmed)
+        val ordered = orderedText(trimmed)
         if (trimmed.isEmpty()) {
             flushParagraph()
         } else if (heading != null) {
             flushParagraph()
-            blocks.add(MdBlock.Heading(heading.groupValues[1].length, heading.groupValues[2]))
+            blocks.add(MdBlock.Heading(heading.first, heading.second))
         } else if (bullet != null) {
             flushParagraph()
-            blocks.add(MdBlock.Bullet(bullet.groupValues[1]))
+            blocks.add(MdBlock.Bullet(bullet))
         } else if (ordered != null) {
             flushParagraph()
-            blocks.add(MdBlock.Ordered(ordered.groupValues[1], ordered.groupValues[2]))
+            blocks.add(MdBlock.Ordered(ordered.first, ordered.second))
         } else {
             if (paragraph.isNotEmpty()) paragraph.append(" ")
             paragraph.append(trimmed)
         }
+        index++
     }
     if (inCode) blocks.add(MdBlock.Code(code.toString().trimEnd()))
     flushParagraph()
     return blocks
 }
 
-private fun inlineMarkdown(text: String, color: Color, codeBg: Color, linkColor: Color): AnnotatedString = buildAnnotatedString {
+private fun splitRow(row: String): List<String> =
+    row.trim().trim('|').split("|").map { it.trim() }
+
+private fun inlineMarkdown(text: String, color: Color, linkColor: Color): AnnotatedString = buildAnnotatedString {
     var i = 0
     while (i < text.length) {
         when {
+            text.startsWith("![", i) -> {
+                val close = text.indexOf(']', i + 2)
+                val open = if (close > 0) text.indexOf('(', close) else -1
+                val end = if (open == close + 1) text.indexOf(')', open) else -1
+                if (close > 0 && open == close + 1 && end > 0) {
+                    withStyle(SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)) {
+                        append("[图片] " + text.substring(i + 2, close))
+                    }
+                    i = end + 1
+                } else { append(text[i]); i++ }
+            }
             text.startsWith("**", i) -> {
                 val end = text.indexOf("**", i + 2)
                 if (end > i) { withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append(text.substring(i + 2, end)) }; i = end + 2 }
@@ -148,12 +235,16 @@ private fun inlineMarkdown(text: String, color: Color, codeBg: Color, linkColor:
             }
             text[i] == '`' -> {
                 val end = text.indexOf('`', i + 1)
-                if (end > i) { withStyle(SpanStyle(fontFamily = FontFamily.Monospace, background = codeBg, color = color)) { append(text.substring(i + 1, end)) }; i = end + 1 }
-                else { append(text[i]); i++ }
+                if (end > i) {
+                    withStyle(SpanStyle(fontFamily = FontFamily.Monospace, background = linkColor.copy(alpha = 0.10f))) {
+                        append(text.substring(i + 1, end))
+                    }
+                    i = end + 1
+                } else { append(text[i]); i++ }
             }
             text.startsWith("~~", i) -> {
                 val end = text.indexOf("~~", i + 2)
-                if (end > i) { withStyle(SpanStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough)) { append(text.substring(i + 2, end)) }; i = end + 2 }
+                if (end > i) { withStyle(SpanStyle(textDecoration = TextDecoration.LineThrough)) { append(text.substring(i + 2, end)) }; i = end + 2 }
                 else { append(text[i]); i++ }
             }
             text[i] == '*' -> {
@@ -164,13 +255,91 @@ private fun inlineMarkdown(text: String, color: Color, codeBg: Color, linkColor:
             text[i] == '[' -> {
                 val close = text.indexOf(']', i)
                 val open = if (close > 0) text.indexOf('(', close) else -1
-                val end = if (open > 0) text.indexOf(')', open) else -1
+                val end = if (open == close + 1) text.indexOf(')', open) else -1
                 if (close > 0 && open == close + 1 && end > 0) {
-                    withStyle(SpanStyle(color = linkColor, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)) { append(text.substring(i + 1, close)) }
+                    val url = text.substring(open + 1, end)
+                    withLink(
+                        LinkAnnotation.Url(
+                            url,
+                            TextLinkStyles(style = SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline)),
+                        ),
+                    ) { append(text.substring(i + 1, close)) }
                     i = end + 1
                 } else { append(text[i]); i++ }
             }
             else -> { append(text[i]); i++ }
+        }
+    }
+}
+
+@Composable
+private fun MarkdownTable(header: List<String>, rows: List<List<String>>, color: Color) {
+    val accent = LocalAuraAccent.current
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(accent.chip.copy(alpha = 0.45f)),
+    ) {
+        Row(Modifier.background(accent.chip).padding(horizontal = 10.dp, vertical = 8.dp)) {
+            header.forEach { cell ->
+                Text(
+                    text = inlineMarkdown(cell, color, accent.deep),
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = color,
+                )
+            }
+        }
+        rows.forEachIndexed { rowIndex, row ->
+            Row(
+                Modifier
+                    .background(if (rowIndex % 2 == 1) Color.White.copy(alpha = 0.35f) else Color.Transparent)
+                    .padding(horizontal = 10.dp, vertical = 7.dp),
+            ) {
+                row.forEach { cell ->
+                    Text(
+                        text = inlineMarkdown(cell, color, accent.deep),
+                        modifier = Modifier.weight(1f).padding(end = 8.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = color,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MarkdownImage(alt: String, url: String) {
+    val accent = LocalAuraAccent.current
+    val bitmap by produceState<androidx.compose.ui.graphics.ImageBitmap?>(initialValue = null, url) {
+        value = withContext(Dispatchers.IO) {
+            runCatching {
+                val connection = (URL(url).openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 6000
+                    readTimeout = 10000
+                }
+                connection.inputStream.use { BitmapFactory.decodeStream(it)?.asImageBitmap() }
+            }.getOrNull()
+        }
+    }
+    val image = bitmap
+    if (image != null) {
+        Image(
+            bitmap = image,
+            contentDescription = alt.ifBlank { null },
+            modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Fit,
+        )
+    } else {
+        Surface(shape = RoundedCornerShape(12.dp), color = accent.chip) {
+            Text(
+                text = "图片" + (if (alt.isBlank()) "" else "：" + alt) + "\n" + url,
+                modifier = Modifier.padding(12.dp),
+                style = MaterialTheme.typography.bodySmall,
+                color = accent.onChip,
+            )
         }
     }
 }
@@ -200,7 +369,11 @@ fun WaveProgress(modifier: Modifier = Modifier) {
                 path.lineTo(x, y)
                 x += 6f
             }
-            drawPath(path, color = if (layer == 0) accent.deep.copy(alpha = 0.55f) else accent.lemon.copy(alpha = 0.85f), style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f))
+            drawPath(
+                path,
+                color = if (layer == 0) accent.deep.copy(alpha = 0.55f) else accent.lemon.copy(alpha = 0.85f),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f),
+            )
         }
     }
 }
