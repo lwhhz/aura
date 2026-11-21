@@ -1,5 +1,11 @@
 package com.aura.chat.ui.components
 
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,6 +72,8 @@ fun ChatComposer(
 ) {
     val accent = LocalAuraAccent.current
     val chat = LocalChatColors.current
+    var trayWidth by remember { mutableStateOf(0.dp) }
+    val density = LocalDensity.current
     Column(modifier.fillMaxWidth()) {
         androidx.compose.animation.AnimatedVisibility(
             visible = deepThinkingOn,
@@ -193,33 +201,38 @@ fun ChatComposer(
             contentColor = chat.text,
         ) {
             Row(
-                modifier = Modifier.padding(start = 10.dp, end = 10.dp, top = 8.dp, bottom = 8.dp),
+                modifier = Modifier.padding(start = 8.dp, end = 6.dp, top = 8.dp, bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                // 模型选择与右侧底托等宽：两者都用 weight(1f)，宽度由剩余空间平分
-                SelectPill(
-                    text = modelLabel,
-                    selected = false,
-                    onClick = onPickModel,
-                    onDark = false,
-                    serif = true,
-                    height = 48.dp,
-                    fillWidth = false,
-                    centerContent = true,
-                    boldText = true,
-                    textStyle = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f),
-                )
-                Spacer(Modifier.width(8.dp))
+                // 模型选择胶囊：宽度跟随右侧底托的实测宽度（等宽），底托本身保持原样
+                Box(
+                    Modifier
+                        .width(136.dp)
+                        .height(48.dp),
+                ) {
+                    SelectPill(
+                        text = modelLabel,
+                        selected = false,
+                        onClick = onPickModel,
+                        onDark = false,
+                        serif = true,
+                        height = 48.dp,
+                        fillWidth = true,
+                        centerContent = true,
+                        boldText = true,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+                Spacer(Modifier.weight(1f))
                 // 三个动作共用一块浅色底托，视觉上成组
                 Surface(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.onSizeChanged { trayWidth = with(density) { it.width.toDp() } },
                     shape = RoundedCornerShape(50),
                     color = if (dark) Color.White.copy(alpha = 0.06f) else accent.chip.copy(alpha = 0.55f),
                 ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                 AuraIconButton(
@@ -270,7 +283,7 @@ fun ChatComposer(
                 }
             }
         }
-        Spacer(Modifier.width(10.dp))
+        Spacer(Modifier.width(6.dp))
         SendButton(
             streaming = streaming,
             enabled = value.isNotBlank() || streaming,
