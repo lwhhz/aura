@@ -21,6 +21,7 @@ import com.aura.chat.data.DemoChats
 import com.aura.chat.data.MessageStatus
 import com.aura.chat.data.DshClient
 import com.aura.chat.data.DshPeer
+import com.aura.chat.data.DshRemoteSession
 import com.aura.chat.data.DshStore
 import com.aura.chat.data.Models
 import com.aura.chat.data.OfficialFiles
@@ -74,6 +75,25 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
     var dshPairing by mutableStateOf(false)
         private set
 
+    var dshSessions by mutableStateOf<List<DshRemoteSession>>(emptyList())
+        private set
+    var dshSessionsLoading by mutableStateOf(false)
+        private set
+    var dshSessionsError by mutableStateOf<String?>(null)
+        private set
+
+    fun loadDshSessions() {
+        val peer = dshPeer ?: return
+        viewModelScope.launch {
+            dshSessionsLoading = true
+            dshSessionsError = null
+            runCatching { DshClient.sessions(peer.host, peer.port, peer.token) }
+                .onSuccess { dshSessions = it }
+                .onFailure { dshSessionsError = it.message ?: "拉取失败" }
+            dshSessionsLoading = false
+        }
+    }
+
     fun pairDsh(host: String, port: Int, code: String) {
         if (host.isBlank() || code.length != 6) {
             notice = "请填 IP 和 6 位配对码"
@@ -89,6 +109,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
                     dshPeer = peer
                     route = Route.DshSessions
                     notice = "已配对：" + host + ":" + port
+                    loadDshSessions()
                 }
                 .onFailure {
                     android.util.Log.e("AuraPairLog", "pair failed: " + it.message)
@@ -246,6 +267,7 @@ class AuraViewModel(app: Application) : AndroidViewModel(app) {
 
     fun openDshSessions() {
         route = Route.DshSessions
+        loadDshSessions()
     }
 
     fun openDshPair() {

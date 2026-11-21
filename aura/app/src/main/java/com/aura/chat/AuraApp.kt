@@ -118,6 +118,10 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
                     Route.DshSessions -> DshSessionsScreen(
                         onBack = vm::back,
                         peer = vm.dshPeer,
+                        sessions = vm.dshSessions,
+                        loading = vm.dshSessionsLoading,
+                        error = vm.dshSessionsError,
+                        onRefresh = vm::loadDshSessions,
                         onOpenSession = { session ->
                             vm.notifyUser("远程会话「" + session.title + "」详情页开发中")
                         },

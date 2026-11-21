@@ -6,7 +6,40 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /** 与 Aura 配对桥（sidecar/插件）通信。 */
+data class DshRemoteSession(val id: String, val title: String, val cwd: String, val createdAt: Long)
+
 object DshClient {
+    /** 拉取电脑端 live 会话列表。 */
+    suspend fun sessions(host: String, port: Int, token: String): List<DshRemoteSession> =
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val url = URL("http://" + host + ":" + port + "/aura/sessions")
+            val conn = (url.openConnection() as HttpURLConnection).apply {
+                requestMethod = "GET"
+                connectTimeout = 5000
+                readTimeout = 8000
+                setRequestProperty("x-aura-token", token)
+            }
+            try {
+                val text = conn.inputStream.bufferedReader().readText()
+                val array = JSONObject(text).optJSONArray("sessions") ?: org.json.JSONArray()
+                buildList {
+                    for (i in 0 until array.length()) {
+                        val item = array.optJSONObject(i) ?: continue
+                        add(
+                            DshRemoteSession(
+                                id = item.optString("id"),
+                                title = item.optString("title"),
+                                cwd = item.optString("cwd"),
+                                createdAt = item.optLong("createdAt"),
+                            )
+                        )
+                    }
+                }
+            } finally {
+                conn.disconnect()
+            }
+        }
+
     /** 用 6 位配对码换长期 token。 */
     suspend fun verify(host: String, port: Int, code: String): String =
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {

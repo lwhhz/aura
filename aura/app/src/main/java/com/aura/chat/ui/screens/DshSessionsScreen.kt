@@ -60,6 +60,10 @@ private val demoSessions = listOf(
 fun DshSessionsScreen(
     onBack: () -> Unit,
     peer: com.aura.chat.data.DshPeer? = null,
+    sessions: List<com.aura.chat.data.DshRemoteSession> = emptyList(),
+    loading: Boolean = false,
+    error: String? = null,
+    onRefresh: () -> Unit = {},
     onOpenSession: (DshSession) -> Unit,
     onPair: () -> Unit,
     modifier: Modifier = Modifier,
@@ -119,9 +123,34 @@ fun DshSessionsScreen(
                         )
                     }
                 }
-                items(demoSessions.size) { index ->
-                    val session = demoSessions[index]
-                    DshSessionCard(session = session, onClick = { onOpenSession(session) })
+                if (loading) {
+                    item(key = "loading") {
+                        Text("正在读取电脑端会话…", style = MaterialTheme.typography.bodyMedium, color = accent.muted)
+                    }
+                }
+                if (error != null) {
+                    item(key = "error") {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(24.dp),
+                            color = accent.card,
+                        ) {
+                            Column(Modifier.padding(18.dp)) {
+                                Text("拉取失败：" + error, style = MaterialTheme.typography.bodySmall, color = accent.muted)
+                                Spacer(Modifier.height(10.dp))
+                                AuraPill(text = "重试", onClick = onRefresh, style = PillStyle.Deep)
+                            }
+                        }
+                    }
+                }
+                if (!loading && error == null && sessions.isEmpty()) {
+                    item(key = "empty") {
+                        Text("电脑上还没有运行中的会话。", style = MaterialTheme.typography.bodyMedium, color = accent.muted)
+                    }
+                }
+                items(sessions.size) { index ->
+                    val session = sessions[index]
+                    DshSessionCard(session = session, onClick = {})
                 }
                 item(key = "pair") {
                     Surface(
@@ -151,7 +180,7 @@ fun DshSessionsScreen(
 }
 
 @Composable
-private fun DshSessionCard(session: DshSession, onClick: () -> Unit) {
+private fun DshSessionCard(session: com.aura.chat.data.DshRemoteSession, onClick: () -> Unit) {
     val accent = LocalAuraAccent.current
     Surface(
         onClick = onClick,
@@ -181,42 +210,38 @@ private fun DshSessionCard(session: DshSession, onClick: () -> Unit) {
                     Box(
                         Modifier
                             .size(8.dp)
-                            .background(
-                                when (session.status) {
-                                    DshStatus.RUNNING -> Color(0xFF2FBF71)
-                                    DshStatus.IDLE -> accent.lemon
-                                    DshStatus.OFFLINE -> accent.muted.copy(alpha = 0.5f)
-                                },
-                                CircleShape,
-                            )
+                            .background(Color(0xFF2FBF71), CircleShape)
                     )
                     Spacer(Modifier.size(6.dp))
                     Text(
-                        text = session.status.label,
+                        text = "live",
                         style = MaterialTheme.typography.labelSmall,
                         color = accent.muted,
                     )
                     Spacer(Modifier.size(8.dp))
                     Text(
-                        text = session.host,
+                        text = session.cwd.substringAfterLast("\\").ifBlank { session.cwd },
                         style = MaterialTheme.typography.labelSmall,
                         color = accent.muted,
                     )
                 }
                 Spacer(Modifier.height(6.dp))
+                val displayTitle = session.title.ifBlank { session.cwd.substringAfterLast("\\").ifBlank { "未命名会话" } }
                 Text(
-                    text = session.title,
+                    text = displayTitle,
                     style = MaterialTheme.typography.titleMedium,
-                    fontFamily = editorialFamily(session.title),
+                    fontFamily = editorialFamily(displayTitle),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     color = accent.text,
                 )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = session.model + " · " + session.toolCalls + " 次工具调用 · " + session.lastActive,
+                    text = session.id.take(18) + " · " + session.cwd,
                     style = MaterialTheme.typography.labelSmall,
                     color = accent.muted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
