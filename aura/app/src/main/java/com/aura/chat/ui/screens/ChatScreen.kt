@@ -75,8 +75,7 @@ fun ChatScreen(
     onRegenerate: () -> Unit,
     onToggleWebSearch: () -> Unit,
     onConsentTools: () -> Unit,
-    onToggleDeepThinking: () -> Unit,
-    onCycleReasoning: () -> Unit,
+    onChangeReasoning: (Int) -> Unit,
     attachmentName: String?,
     uploading: Boolean = false,
     onAttach: () -> Unit,
@@ -161,10 +160,8 @@ fun ChatScreen(
                                 onToggleWebSearch()
                             }
                         },
-                        deepThinkingOn = settings.deepThinkingOn,
-                        onToggleDeepThinking = onToggleDeepThinking,
                         reasoningLevel = settings.reasoningLevel,
-                        onCycleReasoning = onCycleReasoning,
+                        onChangeReasoning = onChangeReasoning,
                             attachmentName = attachmentName,
                         uploading = uploading,
                             onAttach = onAttach,

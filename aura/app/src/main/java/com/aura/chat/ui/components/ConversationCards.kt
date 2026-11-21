@@ -207,9 +207,9 @@ fun ConversationCard(
             Surface(
                 onClick = onDelete,
                 modifier = Modifier
-                    .size(46.dp)
+                    .size(width = 64.dp, height = 64.dp)
                     .semantics { contentDescription = "删除对话" },
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(20.dp),
                 color = accent.chip,
                 contentColor = accent.onChip,
             ) {
@@ -217,7 +217,7 @@ fun ConversationCard(
                     Icon(
                         imageVector = Icons.Rounded.Delete,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(26.dp),
                     )
                 }
             }

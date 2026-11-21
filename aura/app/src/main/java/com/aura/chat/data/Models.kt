@@ -80,9 +80,9 @@ data class AppSettings(
     val demoMode: Boolean = true,
     val webSearchOn: Boolean = false,
     val toolsConsent: Boolean = false,
-    val deepThinkingOn: Boolean = false,
+    val deepThinkingOn: Boolean = true,
     val showNotices: Boolean = true,
-    val reasoningLevel: Int = 1,
+    val reasoningLevel: Int = 2,
 ) {
     val hasKey: Boolean get() = apiKey.isNotBlank()
     val hasSearchKey: Boolean get() = searchKey.isNotBlank()

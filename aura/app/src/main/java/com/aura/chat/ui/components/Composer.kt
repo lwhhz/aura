@@ -1,5 +1,6 @@
 package com.aura.chat.ui.components
 
+import androidx.compose.ui.window.Popup
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.runtime.setValue
@@ -63,10 +64,8 @@ fun ChatComposer(
     modelLabel: String,
     webSearchOn: Boolean,
     onToggleWebSearch: () -> Unit,
-    deepThinkingOn: Boolean,
-    onToggleDeepThinking: () -> Unit,
     reasoningLevel: Int,
-    onCycleReasoning: () -> Unit,
+    onChangeReasoning: (Int) -> Unit,
     attachmentName: String?,
     uploading: Boolean = false,
     onAttach: () -> Unit,
@@ -81,27 +80,6 @@ fun ChatComposer(
     var barHeight by remember { mutableStateOf(56.dp) }
     val density = LocalDensity.current
     Column(modifier.fillMaxWidth()) {
-        androidx.compose.animation.AnimatedVisibility(
-            visible = deepThinkingOn,
-            enter = androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(180)) +
-                androidx.compose.animation.expandVertically(androidx.compose.animation.core.tween(220)),
-            exit = androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(140)) +
-                androidx.compose.animation.shrinkVertically(androidx.compose.animation.core.tween(180)),
-        ) {
-            Row(
-                modifier = Modifier.padding(bottom = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Surface(shape = CircleShape, color = accent.deep, contentColor = accent.lemon) {
-                    Text(
-                        text = "深度思考中",
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        maxLines = 1,
-                    )
-                }
-            }
-        }
         androidx.compose.animation.AnimatedVisibility(
             visible = uploading,
             enter = androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(180)) +
@@ -242,43 +220,7 @@ fun ChatComposer(
                     size = 44.dp,
                     contentDescription = "添加附件",
                 ) { m, c -> PlusGlyph(m, c) }
-                AuraIconButton(
-                    onClick = onCycleReasoning,
-                    container = accent.chip,
-                    content = chat.onSurfaceControl,
-                    size = 44.dp,
-                    contentDescription = "推理等级：" + when (reasoningLevel) { 0 -> "低"; 2 -> "高"; else -> "中" },
-                ) { m, cb ->
-                    Icon(
-                        imageVector = Icons.Rounded.Bolt,
-                        contentDescription = null,
-                        modifier = m.size(20.dp),
-                        tint = cb,
-                    )
-                }
-                // 深度思考（官方 thinking: enabled），替代原语音入口
-                AuraIconButton(
-                    onClick = onToggleDeepThinking,
-                    container = when {
-                        !deepThinkingOn -> accent.chip
-                        dark -> accent.lemon
-                        else -> accent.deep
-                    },
-                    content = when {
-                        !deepThinkingOn -> chat.onSurfaceControl
-                        dark -> accent.onLemon
-                        else -> accent.lemon
-                    },
-                    size = 44.dp,
-                    contentDescription = if (deepThinkingOn) "关闭深度思考" else "打开深度思考",
-                ) { m, c ->
-                    Icon(
-                        imageVector = Icons.Rounded.Psychology,
-                        contentDescription = null,
-                        modifier = m.size(20.dp),
-                        tint = c,
-                    )
-                }
+                ReasoningLevelControl(level = reasoningLevel, onLevelChange = onChangeReasoning)
                 AuraIconButton(
                     onClick = onToggleWebSearch,
                     container = when {
@@ -451,5 +393,81 @@ fun LightTopBar(
             fontFamily = editorialFamily(title),
             color = accent.text,
         )
+    }
+}
+/** 推理等级：点击弹出悬浮面板，四个等级用滑块切换，颜色随强度变化。 */
+@Composable
+private fun ReasoningLevelControl(level: Int, onLevelChange: (Int) -> Unit) {
+    val accent = LocalAuraAccent.current
+    val chat = LocalChatColors.current
+    var open by remember { mutableStateOf(false) }
+    val levelLabels = listOf("OFF", "LOW", "HIGH", "MAX")
+    val label = levelLabels[level.coerceIn(0, 3)]
+    val labelColor = when (level) {
+        0 -> chat.muted
+        1 -> accent.deep.copy(alpha = 0.55f)
+        2 -> accent.deep.copy(alpha = 0.8f)
+        else -> accent.deep
+    }
+    Box {
+        AuraIconButton(
+            onClick = { open = true },
+            container = accent.chip,
+            content = chat.onSurfaceControl,
+            size = 44.dp,
+            contentDescription = "推理等级：" + label,
+        ) { m, cb ->
+            Icon(
+                imageVector = Icons.Rounded.Bolt,
+                contentDescription = null,
+                modifier = m.size(20.dp),
+                tint = cb,
+            )
+        }
+        if (open) {
+            androidx.compose.ui.window.Popup(
+                alignment = Alignment.TopCenter,
+                offset = androidx.compose.ui.unit.IntOffset(0, -with(androidx.compose.ui.platform.LocalDensity.current) { 196.dp.roundToPx() }),
+                onDismissRequest = { open = false },
+            ) {
+                Surface(
+                    modifier = Modifier.width(260.dp),
+                    shape = RoundedCornerShape(24.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    tonalElevation = 6.dp,
+                    shadowElevation = 0.dp,
+                ) {
+                    Column(Modifier.padding(20.dp)) {
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontFamily = editorialFamily(label),
+                            color = labelColor,
+                        )
+                        Spacer(Modifier.height(10.dp))
+                        androidx.compose.material3.Slider(
+                            value = level.toFloat(),
+                            onValueChange = { onLevelChange(it.coerceIn(0f, 3f).toInt()) },
+                            valueRange = 0f..3f,
+                            steps = 2,
+                            colors = androidx.compose.material3.SliderDefaults.colors(
+                                thumbColor = accent.deep,
+                                activeTrackColor = accent.deep,
+                                inactiveTrackColor = accent.chip,
+                            ),
+                        )
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            levelLabels.forEach { item ->
+                                Text(
+                                    text = item,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (item == label) labelColor else chat.muted.copy(alpha = 0.6f),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
