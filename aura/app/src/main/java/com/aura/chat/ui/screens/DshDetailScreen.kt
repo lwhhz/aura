@@ -196,7 +196,7 @@ fun DshDetailScreen(
                             Text(
                                 text = statusText + stepSuffix,
                                 style = MaterialTheme.typography.labelMedium,
-                                color = accent.muted,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
