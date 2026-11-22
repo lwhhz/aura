@@ -1,5 +1,7 @@
 package com.aura.chat.ui.components
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.RepeatMode
@@ -58,7 +60,7 @@ fun UserBubble(text: String, modifier: Modifier = Modifier) {
     val colors = LocalChatColors.current
     Surface(
         modifier = modifier.fillMaxWidth(0.88f),
-        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomEnd = 10.dp, bottomStart = 28.dp),
+        shape = com.aura.chat.ui.theme.AuraComponentShapes.userBubble,
         color = colors.userBubble,
         contentColor = colors.onUserBubble,
     ) {
@@ -83,7 +85,7 @@ fun ReasoningBlock(
     Surface(
         onClick = { expanded = !expanded },
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(22.dp),
+        shape = AuraShapeTokens.largeIncreased,
         color = colors.surfaceAlt,
         contentColor = colors.muted,
     ) {
@@ -155,7 +157,7 @@ fun RichText(
                     .padding(top = 6.dp)
                     .size(width = 9.dp, height = 16.dp)
                     .alpha(caretAlpha)
-                    .background(colors.highlight, RoundedCornerShape(2.dp))
+                    .background(colors.highlight, AuraShapeTokens.micro)
             )
         }
     }
@@ -293,7 +295,7 @@ fun CitationRow(citations: List<Citation>, modifier: Modifier = Modifier) {
             items(shown) { citation ->
                 Surface(
                     onClick = { if (citation.url.isNotBlank()) runCatching { uriHandler.openUri(citation.url) } },
-                    shape = RoundedCornerShape(20.dp),
+                    shape = AuraShapeTokens.largeIncreased,
                     color = colors.surfaceAlt,
                     contentColor = colors.muted,
                 ) {

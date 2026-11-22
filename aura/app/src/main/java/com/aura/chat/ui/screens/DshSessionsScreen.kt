@@ -1,5 +1,7 @@
 package com.aura.chat.ui.screens
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -87,7 +89,7 @@ fun DshSessionsScreen(
                     item(key = "peer") {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp),
+                            shape = AuraShapeTokens.extraLarge,
                             color = accent.lemon,
                             contentColor = accent.onLemon,
                         ) {
@@ -132,7 +134,7 @@ fun DshSessionsScreen(
                     item(key = "error") {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp),
+                            shape = AuraShapeTokens.extraLarge,
                             color = accent.card,
                         ) {
                             Column(Modifier.padding(18.dp)) {
@@ -155,7 +157,7 @@ fun DshSessionsScreen(
                 item(key = "pair") {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(28.dp),
+                        shape = AuraShapeTokens.extraLarge,
                         color = Color.Transparent,
                     ) {
                         Column(
@@ -185,7 +187,7 @@ private fun DshSessionCard(session: com.aura.chat.data.DshRemoteSession, onClick
     Surface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
+        shape = AuraShapeTokens.extraLarge,
         color = accent.card,
         contentColor = accent.text,
     ) {
@@ -194,7 +196,7 @@ private fun DshSessionCard(session: com.aura.chat.data.DshRemoteSession, onClick
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier.size(52.dp).background(accent.chip, RoundedCornerShape(18.dp)),
+                modifier = Modifier.size(52.dp).background(accent.chip, AuraShapeTokens.largeIncreased),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(

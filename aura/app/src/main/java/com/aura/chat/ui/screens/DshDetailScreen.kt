@@ -1,5 +1,7 @@
 package com.aura.chat.ui.screens
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -175,7 +177,7 @@ fun DshDetailScreen(
                 if (processing) {
                     Surface(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
-                        shape = RoundedCornerShape(14.dp),
+                        shape = AuraShapeTokens.large,
                         color = accent.deep.copy(alpha = 0.10f),
                     ) {
                         Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
@@ -217,7 +219,7 @@ fun DshDetailScreen(
                         val isUser = message.role == "user"
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp),
+                            shape = AuraShapeTokens.extraLarge,
                             color = if (isUser) accent.chip else accent.card,
                             contentColor = if (isUser) accent.onChip else accent.text,
                         ) {

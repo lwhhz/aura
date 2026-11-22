@@ -22,15 +22,15 @@ data class ChatColors(
 
 val LocalChatColors = staticCompositionLocalOf {
     ChatColors(
-        background = Color(0xFF0D0B14),
-        surface = Color(0xFF171320),
-        surfaceAlt = Color(0xFF241E36),
-        text = Color(0xFFF2EFFF),
-        muted = Color(0xFFB4ACD0),
-        userBubble = Color(0xFF7A74FF),
+        background = com.aura.chat.ui.theme.InkPage,
+        surface = com.aura.chat.ui.theme.ChatSurfaceDark,
+        surfaceAlt = com.aura.chat.ui.theme.ChatSurfaceAltDark,
+        text = com.aura.chat.ui.theme.TextOnDark,
+        muted = com.aura.chat.ui.theme.MutedDark,
+        userBubble = com.aura.chat.ui.theme.UserBubbleDark,
         onUserBubble = Color.White,
-        highlight = Color(0xFFE9FF7A),
-        onSurfaceControl = Color(0xFFC9C4FF),
+        highlight = com.aura.chat.ui.theme.Lemon,
+        onSurfaceControl = com.aura.chat.ui.theme.ControlOnDark,
     )
 }
 

@@ -1,5 +1,7 @@
 package com.aura.chat.ui.components
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.rounded.ChatBubble
 import androidx.compose.material.icons.rounded.Bolt
@@ -59,7 +61,7 @@ fun FeaturedConversationCard(
     Surface(
         onClick = onOpen,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(36.dp),
+        shape = AuraShapeTokens.extraLargeIncreased,
         color = accent.featured,
         contentColor = accent.onFeatured,
     ) {
@@ -168,7 +170,7 @@ fun ConversationCard(
     Surface(
         onClick = onOpen,
         modifier = modifier.fillMaxWidth().scale(scale),
-        shape = RoundedCornerShape(30.dp),
+        shape = AuraShapeTokens.extraLargeIncreased,
         color = if (selected) accent.chip else accent.card,
         contentColor = accent.text,
         interactionSource = interaction,
@@ -212,7 +214,7 @@ fun ConversationCard(
                 modifier = Modifier
                     .size(width = 54.dp, height = 74.dp)
                     .semantics { contentDescription = "删除对话" },
-                shape = RoundedCornerShape(24.dp),
+                shape = AuraShapeTokens.extraLarge,
                 color = accent.chip,
                 contentColor = accent.onChip,
             ) {

@@ -1,5 +1,7 @@
 package com.aura.chat.ui.components
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -38,10 +40,10 @@ data class ArtPalette(val from: Color, val to: Color, val glow: Color, val glyph
 
 private val palettes = listOf(
     ArtPalette(from = Violet700, to = Periwinkle, glow = Lavender300, glyph = "S"),
-    ArtPalette(from = Lavender200, to = Blush, glow = Color(0xFFFFF3D6), glyph = "A"),
-    ArtPalette(from = Color(0xFF17364D), to = Periwinkle, glow = Sky, glyph = "7"),
+    ArtPalette(from = Lavender200, to = Blush, glow = com.aura.chat.ui.theme.ArtGlowWarm, glyph = "A"),
+    ArtPalette(from = com.aura.chat.ui.theme.ArtNavy, to = Periwinkle, glow = Sky, glyph = "7"),
     ArtPalette(from = Ink950, to = Violet500, glow = Lemon, glyph = "W"),
-    ArtPalette(from = Color(0xFF3A2C5E), to = Lavender300, glow = Color(0xFFFFE9A3), glyph = "N"),
+    ArtPalette(from = com.aura.chat.ui.theme.ArtPlum, to = Lavender300, glow = com.aura.chat.ui.theme.ArtGlowGold, glyph = "N"),
 )
 
 fun paletteOf(accent: Int): ArtPalette = palettes[accent % palettes.size]
@@ -50,7 +52,7 @@ fun paletteOf(accent: Int): ArtPalette = palettes[accent % palettes.size]
 fun AuraArt(
     accent: Int,
     modifier: Modifier = Modifier,
-    shape: RoundedCornerShape = RoundedCornerShape(24.dp),
+    shape: RoundedCornerShape = AuraShapeTokens.extraLarge,
     glyph: String? = null,
     glyphSize: Int = 40,
 ) {
@@ -68,7 +70,7 @@ fun AuraArt(
                 style = TextStyle(
                     fontFamily = DisplaySerif,
                     fontWeight = FontWeight.SemiBold,
-                    fontSize = glyphSize.sp,
+                    fontSize = glyphSize.sp, // ui-lint: allow
                     color = Color.White.copy(alpha = 0.92f),
                 ),
             )
@@ -111,13 +113,13 @@ fun AuraAvatar(
     Box(
         modifier = modifier
             .size(size)
-            .clip(RoundedCornerShape(50))
+            .clip(AuraShapeTokens.full)
             .background(Brush.linearGradient(listOf(p.from, p.to))),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = initials,
-            fontSize = (size.value * 0.36f).sp,
+            fontSize = (size.value * 0.36f).sp, // ui-lint: allow
             fontWeight = FontWeight.SemiBold,
             color = Color.White.copy(alpha = 0.95f),
         )

@@ -1,5 +1,7 @@
 package com.aura.chat.ui.components
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -61,7 +63,7 @@ fun MarkdownText(text: String, modifier: Modifier = Modifier, color: Color = Loc
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         for (block in blocks) {
             when (block) {
-                is MdBlock.Code -> Surface(shape = RoundedCornerShape(12.dp), color = accent.chip) {
+                is MdBlock.Code -> Surface(shape = AuraShapeTokens.medium, color = accent.chip) {
                     Text(
                         text = block.text,
                         modifier = Modifier.padding(12.dp),
@@ -285,7 +287,7 @@ private fun MarkdownTable(header: List<String>, rows: List<List<String>>, color:
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(AuraShapeTokens.medium)
             .background(accent.chip.copy(alpha = 0.45f)),
     ) {
         Row(Modifier.background(accent.chip).padding(horizontal = 10.dp, vertical = 8.dp)) {
@@ -375,12 +377,12 @@ private fun MarkdownImage(alt: String, rawUrl: String) {
         Image(
             bitmap = image,
             contentDescription = alt.ifBlank { null },
-            modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).clip(RoundedCornerShape(12.dp))
+            modifier = Modifier.fillMaxWidth().heightIn(max = 240.dp).clip(AuraShapeTokens.medium)
                 .clickable { preview = true },
             contentScale = ContentScale.Fit,
         )
     } else {
-        Surface(shape = RoundedCornerShape(12.dp), color = accent.chip) {
+        Surface(shape = AuraShapeTokens.medium, color = accent.chip) {
             Text(
                 text = "图片" + (if (alt.isBlank()) "" else "：" + alt) + "\n" + url,
                 modifier = Modifier.padding(12.dp),

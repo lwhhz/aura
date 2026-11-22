@@ -35,3 +35,17 @@ val StatusGrayLight = Color(0xFF6B6475)
 val StatusGrayDark = Color(0xFFB4ACD0)
 // 更深的次要文字：Muted 在薰衣草底仅 3.32:1，正文需 >=4.5
 val MutedStrong = Color(0xFF4D4658)
+
+// 危险/画布装饰用固定色（从页面裸值收编）
+val DangerLight = Color(0xFFC5221F)
+val DangerContainerLight = Color(0xFFFFD9E4)
+val ArtGlowWarm = Color(0xFFFFF3D6)
+val ArtGlowGold = Color(0xFFFFE9A3)
+val ArtNavy = Color(0xFF17364D)
+val ArtPlum = Color(0xFF3A2C5E)
+val InkPage = Color(0xFF0F0D17)
+val ChatSurfaceDark = Color(0xFF171320)
+val ChatSurfaceAltDark = Color(0xFF241E36)
+val TextOnDark = Color(0xFFF2EFFF)
+val UserBubbleDark = Color(0xFF7A74FF)
+val ControlOnDark = Color(0xFFC9C4FF)

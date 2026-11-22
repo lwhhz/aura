@@ -1,5 +1,7 @@
 package com.aura.chat.ui.components
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import androidx.compose.material.icons.rounded.Computer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -145,7 +147,7 @@ fun ChatComposer(
         }
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(30.dp),
+            shape = AuraShapeTokens.extraLargeIncreased,
             color = chat.surface,
             contentColor = chat.text,
         ) {
@@ -162,7 +164,7 @@ fun ChatComposer(
                     modifier = Modifier.fillMaxWidth().heightIn(min = 24.dp, max = 132.dp),
                     textStyle = TextStyle(
                         color = chat.text,
-                        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize, // ui-lint: allow
                         lineHeight = MaterialTheme.typography.bodyLarge.lineHeight,
                     ),
                     cursorBrush = SolidColor(chat.highlight),
@@ -193,7 +195,7 @@ fun ChatComposer(
         ) {
         Surface(
             modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(50),
+            shape = AuraShapeTokens.full,
             color = if (dark) Color.White.copy(alpha = 0.08f) else Color.White,
             contentColor = chat.text,
         ) {
@@ -211,7 +213,7 @@ fun ChatComposer(
                 // 三个动作共用一块浅色底托，视觉上成组
                 Surface(
                     modifier = Modifier.onSizeChanged { trayWidth = with(density) { it.width.toDp() } },
-                    shape = RoundedCornerShape(50),
+                    shape = AuraShapeTokens.full,
                     color = if (dark) Color.White.copy(alpha = 0.06f) else accent.chip.copy(alpha = 0.55f),
                 ) {
                 Row(
@@ -464,7 +466,7 @@ fun ReasoningPanel(level: Int, onLevelChange: (Int) -> Unit) {
     }
     Surface(
         modifier = Modifier.width(268.dp),
-        shape = RoundedCornerShape(24.dp),
+        shape = AuraShapeTokens.extraLarge,
         color = MaterialTheme.colorScheme.surface,
         tonalElevation = 6.dp,
         shadowElevation = 0.dp,

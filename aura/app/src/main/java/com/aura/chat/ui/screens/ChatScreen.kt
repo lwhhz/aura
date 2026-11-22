@@ -1,5 +1,7 @@
 package com.aura.chat.ui.screens
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import kotlin.math.roundToInt
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.Icons
@@ -205,7 +207,7 @@ fun ChatScreen(
                     ) {
                         Surface(
                             onClick = { reasoningPanelOpen = false },
-                            shape = RoundedCornerShape(50),
+                            shape = AuraShapeTokens.full,
                             // 与联网按钮“开启态”同款配色
                             color = if (dark) accent.lemon else accent.deep,
                             contentColor = if (dark) accent.onLemon else accent.lemon,
@@ -245,7 +247,7 @@ fun ChatScreen(
                     dismissButton = {
                         TextButton(onClick = { showToolsConsent = false }) { Text("取消") }
                     },
-                    shape = RoundedCornerShape(30.dp),
+                    shape = AuraShapeTokens.extraLargeIncreased,
                     containerColor = MaterialTheme.colorScheme.surface,
                 )
             }
@@ -296,7 +298,7 @@ private fun ChatWelcome(onPrompt: (String) -> Unit) {
             Surface(
                 onClick = { onPrompt(prompt) },
                 modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
-                shape = RoundedCornerShape(20.dp),
+                shape = AuraShapeTokens.largeIncreased,
                 color = colors.surface,
                 contentColor = colors.text,
             ) {

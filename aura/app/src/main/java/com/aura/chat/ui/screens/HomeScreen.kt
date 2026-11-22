@@ -1,5 +1,7 @@
 package com.aura.chat.ui.screens
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -264,7 +266,7 @@ fun HomeScreen(
                     dismissButton = {
                         TextButton(onClick = { confirmDelete = null }) { Text("取消", color = accent.muted) }
                     },
-                    shape = RoundedCornerShape(30.dp),
+                    shape = AuraShapeTokens.extraLargeIncreased,
                     containerColor = accent.card,
                 )
             }
@@ -286,10 +288,10 @@ private fun EmptyHomeCard(onNewChat: () -> Unit) {
     val accent = LocalAuraAccent.current
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(30.dp),
+        shape = AuraShapeTokens.extraLargeIncreased,
         color = accent.card,
     ) {
-        Column(Modifier.padding(22.dp)) {
+        Column(Modifier.padding(20.dp)) {
             EditorialHeader(
                 eyebrow = "From scratch",
                 title = "先从一句话开始",

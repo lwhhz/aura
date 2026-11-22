@@ -309,7 +309,7 @@ private fun NoticeBanner(text: String?, onDismiss: () -> Unit, modifier: Modifie
     }
     Surface(
         modifier = modifier.navigationBarsPadding().padding(bottom = 172.dp),
-        shape = RoundedCornerShape(18.dp),
+        shape = com.aura.chat.ui.theme.AuraShapeTokens.largeIncreased,
         color = accent.ink,
         contentColor = accent.onInk,
         shadowElevation = 12.dp,

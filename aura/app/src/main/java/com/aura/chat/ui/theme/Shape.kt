@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
  */
 object AuraShapeTokens {
     val none = RoundedCornerShape(0.dp)
+    val micro = RoundedCornerShape(2.dp)
     val extraSmall = RoundedCornerShape(4.dp)
     val small = RoundedCornerShape(8.dp)
     val medium = RoundedCornerShape(12.dp)

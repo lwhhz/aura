@@ -1,5 +1,7 @@
 package com.aura.chat.ui.screens
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -77,12 +79,12 @@ private data class SettingsPalette(
 private val LocalSettingsPalette = staticCompositionLocalOf {
     SettingsPalette(
         card = Color.White,
-        onCard = Color(0xFF15131A),
-        eyebrow = Color(0xFF4D348F),
-        field = Color(0xFFD4BFFF),
-        onField = Color(0xFF4D348F),
-        muted = Color(0xFF827B91),
-        danger = Color(0xFFC5221F),
+        onCard = com.aura.chat.ui.theme.Ink950,
+        eyebrow = com.aura.chat.ui.theme.Violet700,
+        field = com.aura.chat.ui.theme.Lavender200,
+        onField = com.aura.chat.ui.theme.Violet700,
+        muted = com.aura.chat.ui.theme.MutedStrong,
+        danger = com.aura.chat.ui.theme.DangerLight,
     )
 }
 
@@ -115,7 +117,7 @@ fun SettingsScreen(
             field = Color.White.copy(alpha = 0.16f),
             onField = accent.onDeep,
             muted = accent.onDeep.copy(alpha = 0.72f),
-            danger = Color(0xFFFFD9E4),
+            danger = com.aura.chat.ui.theme.DangerContainerLight,
         )
     }
     var keyVisible by remember { mutableStateOf(false) }
@@ -147,7 +149,7 @@ fun SettingsScreen(
                             color = accent.deep,
                             contentColor = accent.onDeep,
                         ) {
-                            Column(Modifier.padding(22.dp)) {
+                            Column(Modifier.padding(20.dp)) {
                                 Eyebrow("设置", color = accent.lemon)
                                 Spacer(Modifier.height(10.dp))
                                 Text(
@@ -337,7 +339,7 @@ fun SettingsScreen(
                         }) { Text("清空", color = MaterialTheme.colorScheme.error) }
                     },
                     dismissButton = {
-                        TextButton(onClick = { confirmClear = false }) { Text("取消", color = Color(0xFF827B91)) }
+                        TextButton(onClick = { confirmClear = false }) { Text("取消", color = com.aura.chat.ui.theme.MutedStrong) }
                     },
                     shape = com.aura.chat.ui.theme.AuraShapeTokens.extraLarge,
                     containerColor = Color.White,
@@ -448,7 +450,7 @@ private fun ModelRow(
         Box(
             Modifier
                 .size(40.dp)
-                .background(accent.lemon, RoundedCornerShape(16.dp)),
+                .background(accent.lemon, AuraShapeTokens.large),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

@@ -1,5 +1,7 @@
 package com.aura.chat.ui.screens
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -185,7 +187,7 @@ fun DshPairScreen(
                     item(key = "perm") {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp),
+                            shape = AuraShapeTokens.extraLarge,
                             color = accent.lemon,
                             contentColor = accent.onLemon,
                         ) {
@@ -216,7 +218,7 @@ fun DshPairScreen(
                     item(key = "empty") {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp),
+                            shape = AuraShapeTokens.extraLarge,
                             color = accent.card,
                         ) {
                             Text(
@@ -231,7 +233,7 @@ fun DshPairScreen(
                     items(hosts) { host ->
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(24.dp),
+                            shape = AuraShapeTokens.extraLarge,
                             color = accent.card,
                         ) {
                             Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -251,7 +253,7 @@ fun DshPairScreen(
                 item(key = "manual") {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(28.dp),
+                        shape = AuraShapeTokens.extraLarge,
                         color = accent.card,
                     ) {
                         Column(Modifier.padding(18.dp)) {
@@ -263,7 +265,7 @@ fun DshPairScreen(
                                     onValueChange = { manualHost = it },
                                     label = { Text("IP 地址") },
                                     singleLine = true,
-                                    shape = RoundedCornerShape(18.dp),
+                                    shape = AuraShapeTokens.largeIncreased,
                                     colors = pairFieldColors(),
                                     modifier = Modifier.weight(1f),
                                 )
@@ -272,7 +274,7 @@ fun DshPairScreen(
                                     onValueChange = { manualPort = it.filter { c -> c.isDigit() } },
                                     label = { Text("端口") },
                                     singleLine = true,
-                                    shape = RoundedCornerShape(18.dp),
+                                    shape = AuraShapeTokens.largeIncreased,
                                     colors = pairFieldColors(),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                     modifier = Modifier.size(width = 104.dp, height = 64.dp),
@@ -284,7 +286,7 @@ fun DshPairScreen(
                                 onValueChange = { code = it.filter { c -> c.isDigit() }.take(6) },
                                 label = { Text("6 位配对码") },
                                 singleLine = true,
-                                shape = RoundedCornerShape(18.dp),
+                                shape = AuraShapeTokens.largeIncreased,
                                 colors = pairFieldColors(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 modifier = Modifier.fillMaxWidth(),

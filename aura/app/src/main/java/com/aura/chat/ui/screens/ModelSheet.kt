@@ -1,5 +1,7 @@
 package com.aura.chat.ui.screens
 
+import com.aura.chat.ui.theme.AuraShapeTokens
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -59,7 +61,7 @@ fun ModelSheet(
         containerColor = accent.ink,
         contentColor = accent.onInk,
         scrimColor = Color.Black.copy(alpha = 0.5f),
-        shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp),
+        shape = com.aura.chat.ui.theme.AuraShapeTokens.extraLargeIncreased,
         dragHandle = null,
     ) {
         Column(Modifier.fillMaxWidth().padding(start = 22.dp, end = 22.dp, top = 26.dp, bottom = 30.dp)) {
@@ -82,7 +84,7 @@ fun ModelSheet(
                                 selected -> accent.lemon
                                 else -> Color.White.copy(alpha = 0.07f)
                             },
-                            RoundedCornerShape(26.dp),
+                            AuraShapeTokens.extraLarge,
                         )
                         .clickable {
                             onSelect(model.id)
@@ -96,7 +98,7 @@ fun ModelSheet(
                             .size(44.dp)
                             .background(
                                 if (selected) accent.onLemon else accent.deep,
-                                RoundedCornerShape(16.dp),
+                                AuraShapeTokens.large,
                             ),
                         contentAlignment = Alignment.Center,
                     ) {
