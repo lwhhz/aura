@@ -210,7 +210,7 @@ private fun DshSessionCard(session: com.aura.chat.data.DshRemoteSession, onClick
                     Box(
                         Modifier
                             .size(8.dp)
-                            .background(Color(0xFF2FBF71), CircleShape)
+                            .background(accent.statusRunning, CircleShape)
                     )
                     Spacer(Modifier.size(6.dp))
                     Text(

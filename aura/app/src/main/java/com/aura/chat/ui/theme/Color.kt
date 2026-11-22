@@ -26,3 +26,12 @@ val OutlineLight = Color(0xFFC9BCE8)
 val OutlineDark = Color(0xFF4A4358)
 val Blush = Color(0xFFFFD9E4)
 val Sky = Color(0xFFBFE6FF)
+// 语义状态色（知识库要求：状态不能只靠颜色表达，仍需配文字）
+val StatusGreenLight = Color(0xFF1E7F4F)
+val StatusGreenDark = Color(0xFF5FDD9B)
+val StatusAmberLight = Color(0xFF8A6D00)
+val StatusAmberDark = Color(0xFFE9FF7A)
+val StatusGrayLight = Color(0xFF6B6475)
+val StatusGrayDark = Color(0xFFB4ACD0)
+// 更深的次要文字：Muted 在薰衣草底仅 3.32:1，正文需 >=4.5
+val MutedStrong = Color(0xFF4D4658)

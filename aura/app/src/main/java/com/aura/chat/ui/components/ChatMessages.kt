@@ -204,22 +204,23 @@ fun AssistantBlock(
         }
         Surface(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(
-                topStart = 28.dp,
-                topEnd = 28.dp,
-                bottomEnd = 28.dp,
-                // 左下角收小，标记“来自 AI”，与用户气泡右下角对应
-                bottomStart = 8.dp,
-            ),
+            shape = com.aura.chat.ui.theme.AuraComponentShapes.assistantBubble,
             color = colors.surface,
             contentColor = colors.text,
         ) {
             Column(Modifier.padding(horizontal = 20.dp, vertical = 18.dp)) {
-                RichText(
-                    text = message.text.ifBlank { if (streaming) "" else "（空回答）" },
-                    streaming = streaming,
-                    color = colors.text,
-                )
+                if (streaming) {
+                    RichText(
+                        text = message.text.ifBlank { "" },
+                        streaming = true,
+                        color = colors.text,
+                    )
+                } else {
+                    com.aura.chat.ui.components.MarkdownText(
+                        text = message.text.ifBlank { "（空回答）" },
+                        color = colors.text,
+                    )
+                }
                 if (streaming) {
                     Spacer(Modifier.height(12.dp))
                     LinearWavyProgressIndicator(

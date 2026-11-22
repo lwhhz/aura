@@ -46,6 +46,12 @@ data class AuraAccent(
     val muted: Color,
     val onInk: Color,
     val onInkMuted: Color,
+    val statusRunning: Color,
+    val statusRunningContainer: Color,
+    val statusIdle: Color,
+    val statusOffline: Color,
+    val statusError: Color,
+    val mutedStrong: Color,
 )
 
 private val LightAccent = AuraAccent(
@@ -65,9 +71,15 @@ private val LightAccent = AuraAccent(
     userBubble = Periwinkle,
     cyan = Color(0xFF3DDCFF),
     text = Ink950,
-    muted = Muted,
+    muted = MutedStrong,
     onInk = Color(0xFFF6F2FF),
     onInkMuted = MutedDark,
+    statusRunning = StatusGreenLight,
+    statusRunningContainer = Color(0xFFD7F5E4),
+    statusIdle = StatusAmberLight,
+    statusOffline = StatusGrayLight,
+    statusError = Color(0xFFB3261E),
+    mutedStrong = MutedStrong,
 )
 
 private val DarkAccent = AuraAccent(
@@ -91,24 +103,15 @@ private val DarkAccent = AuraAccent(
     muted = Color(0xFFB4ACD0),
     onInk = Color(0xFFF2EFFF),
     onInkMuted = Color(0xFFB4ACD0),
+    statusRunning = StatusGreenDark,
+    statusRunningContainer = Color(0xFF123B27),
+    statusIdle = StatusAmberDark,
+    statusOffline = StatusGrayDark,
+    statusError = Color(0xFFFFB4AB),
+    mutedStrong = Color(0xFFC9C4E4),
 )
 
 val LocalAuraAccent = staticCompositionLocalOf { LightAccent }
-
-/** 4dp 节奏的间距令牌。 */
-@Immutable
-data class AuraSpacing(
-    val xxs: Dp = 2.dp,
-    val xs: Dp = 4.dp,
-    val sm: Dp = 8.dp,
-    val smd: Dp = 12.dp,
-    val md: Dp = 16.dp,
-    val lg: Dp = 24.dp,
-    val xl: Dp = 32.dp,
-    val xxl: Dp = 44.dp,
-)
-
-val LocalAuraSpacing = staticCompositionLocalOf { AuraSpacing() }
 
 private val LightScheme = lightColorScheme(
     primary = Brand,

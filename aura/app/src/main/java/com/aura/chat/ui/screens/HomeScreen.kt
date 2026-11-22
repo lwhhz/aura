@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.Computer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -96,8 +97,8 @@ fun HomeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding(),
-                contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 12.dp, bottom = 148.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 112.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 item(key = "header") {
                     Row(
@@ -114,6 +115,21 @@ fun HomeScreen(
                                 color = accent.text,
                             )
                         }
+                        AuraIconButton(
+                            onClick = onOpenDsh,
+                            container = accent.chip,
+                            content = accent.onChip,
+                            size = 50.dp,
+                            contentDescription = "DSH 实时对话",
+                        ) { m, _ ->
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Rounded.Computer,
+                                contentDescription = null,
+                                modifier = m.size(20.dp),
+                                tint = accent.onChip,
+                            )
+                        }
+                        Spacer(Modifier.size(8.dp))
                         AuraIconButton(
                             onClick = onSettings,
                             container = accent.chip,
@@ -236,15 +252,12 @@ fun HomeScreen(
                 )
             }
 
-            Column(
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .navigationBarsPadding()
-                    .padding(end = 20.dp, bottom = 20.dp),
-                horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                    .padding(end = 16.dp, bottom = 16.dp),
             ) {
-                DshDock(onOpen = onOpenDsh)
                 NewChatDock(onNewChat = onNewChat)
             }
         }
