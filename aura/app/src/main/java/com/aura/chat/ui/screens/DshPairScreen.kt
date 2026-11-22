@@ -322,8 +322,8 @@ private fun pairFieldColors() = run {
         unfocusedIndicatorColor = Color.Transparent,
         disabledIndicatorColor = Color.Transparent,
         cursorColor = accent.deep,
-        focusedLabelColor = accent.onChip.copy(alpha = 0.85f),
-        unfocusedLabelColor = accent.onChip.copy(alpha = 0.7f),
+        focusedLabelColor = accent.onChip,
+        unfocusedLabelColor = accent.onChip.copy(alpha = 0.9f),
         focusedTextColor = accent.onChip,
         unfocusedTextColor = accent.onChip,
     )
