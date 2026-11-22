@@ -75,7 +75,9 @@ fun AuraApp(vm: AuraViewModel = viewModel()) {
             val windowInfo = androidx.compose.ui.platform.LocalWindowInfo.current
             val density = androidx.compose.ui.platform.LocalDensity.current
             val windowWidthDp = with(density) { windowInfo.containerSize.width.toDp().value }
-            val twoPane = LocalConfiguration.current.screenWidthDp >= 840 || windowWidthDp >= 840
+            // 双栏只用于 Home/Chat；DSH/设置等走单栏全屏，避免路由被导航器吞掉
+            val wide = LocalConfiguration.current.screenWidthDp >= 840 || windowWidthDp >= 840
+            val twoPane = wide && (route == Route.Home || route is Route.Chat)
 
             if (twoPane) {
                 AdaptiveTwoPane(
