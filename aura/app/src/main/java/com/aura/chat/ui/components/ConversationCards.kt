@@ -132,10 +132,13 @@ fun FeaturedConversationCard(
                     Spacer(Modifier.width(10.dp))
                     Text(
                         text = Models.of(conversation.model).label,
+                        modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.labelLarge,
                         color = accent.onFeatured.copy(alpha = 0.9f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
-                    Spacer(Modifier.weight(1f))
+                    Spacer(Modifier.width(8.dp))
                     Text(
                         text = "打开 →",
                         style = MaterialTheme.typography.labelLarge,

@@ -148,20 +148,37 @@ fun HomeScreen(
                 }
 
                 item(key = "manifesto") {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "慢一点，想清楚再回答。",
-                            style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
-                            color = accent.muted,
-                            maxLines = 1,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Spacer(Modifier.size(10.dp))
-                        AuraTag(
-                            text = if (demoMode) "演示模式" else "已连接",
-                            container = accent.lemon,
-                            content = accent.onLemon,
-                        )
+                    val fontScale = androidx.compose.ui.platform.LocalDensity.current.fontScale
+                    if (fontScale >= 1.5f) {
+                        Column {
+                            Text(
+                                text = "慢一点，想清楚再回答。",
+                                style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                                color = accent.muted,
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            AuraTag(
+                                text = if (demoMode) "演示模式" else "已连接",
+                                container = accent.lemon,
+                                content = accent.onLemon,
+                            )
+                        }
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "慢一点，想清楚再回答。",
+                                style = MaterialTheme.typography.bodyLarge.copy(fontStyle = FontStyle.Italic),
+                                color = accent.muted,
+                                maxLines = 2,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Spacer(Modifier.size(10.dp))
+                            AuraTag(
+                                text = if (demoMode) "演示模式" else "已连接",
+                                container = accent.lemon,
+                                content = accent.onLemon,
+                            )
+                        }
                     }
                 }
 
