@@ -60,6 +60,7 @@ import com.aura.chat.ui.components.PillStyle
 import com.aura.chat.ui.theme.LocalAuraAccent
 import com.aura.chat.ui.theme.editorialFamily
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DshDetailScreen(
     sessionId: String,
@@ -184,11 +185,8 @@ fun DshDetailScreen(
                             Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            androidx.compose.material3.CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                                color = accent.deep,
-                                strokeWidth = 2.5.dp,
-                                trackColor = accent.deep.copy(alpha = 0.15f),
+                            androidx.compose.material3.LoadingIndicator(
+                                modifier = Modifier.size(48.dp),
                             )
                             Spacer(Modifier.width(10.dp))
                             Text(
