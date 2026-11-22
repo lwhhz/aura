@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -56,7 +57,6 @@ import com.aura.chat.ui.components.LightTopBar
 import com.aura.chat.ui.components.MarkdownImageAuth
 import com.aura.chat.ui.components.MarkdownText
 import com.aura.chat.ui.components.PillStyle
-import com.aura.chat.ui.components.WaveProgress
 import com.aura.chat.ui.theme.LocalAuraAccent
 import com.aura.chat.ui.theme.editorialFamily
 
@@ -180,16 +180,24 @@ fun DshDetailScreen(
                         shape = AuraShapeTokens.large,
                         color = accent.deep.copy(alpha = 0.10f),
                     ) {
-                        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                        Row(
+                            Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            androidx.compose.material3.CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = accent.deep,
+                                strokeWidth = 2.5.dp,
+                                trackColor = accent.deep.copy(alpha = 0.15f),
+                            )
+                            Spacer(Modifier.width(10.dp))
                             Text(
-                                text = "● " + statusText + stepSuffix,
+                                text = statusText + stepSuffix,
                                 style = MaterialTheme.typography.labelMedium,
                                 color = accent.muted,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
-                            Spacer(Modifier.height(6.dp))
-                            WaveProgress(Modifier.fillMaxWidth())
                         }
                     }
                 }

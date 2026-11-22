@@ -392,37 +392,3 @@ private fun MarkdownImage(alt: String, rawUrl: String) {
         }
     }
 }
-
-@Composable
-fun WaveProgress(modifier: Modifier = Modifier) {
-    val accent = LocalAuraAccent.current
-    val transition = androidx.compose.animation.core.rememberInfiniteTransition(label = "wave")
-    val phase by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = androidx.compose.animation.core.infiniteRepeatable(
-            animation = androidx.compose.animation.core.tween(1400, easing = androidx.compose.animation.core.LinearEasing),
-        ),
-        label = "phase",
-    )
-    androidx.compose.foundation.Canvas(modifier.fillMaxWidth().height(12.dp)) {
-        drawRoundRect(color = accent.chip, cornerRadius = androidx.compose.ui.geometry.CornerRadius(size.height / 2))
-        for (layer in 0..1) {
-            val path = androidx.compose.ui.graphics.Path()
-            val amplitude = size.height * (0.28f - layer * 0.08f)
-            val mid = size.height / 2f
-            var x = 0f
-            path.moveTo(0f, mid)
-            while (x <= size.width) {
-                val y = mid + kotlin.math.sin((x / size.width * 6.2832f * 2f) + phase * 6.2832f).toFloat() * amplitude
-                path.lineTo(x, y)
-                x += 6f
-            }
-            drawPath(
-                path,
-                color = if (layer == 0) accent.deep.copy(alpha = 0.55f) else accent.lemon.copy(alpha = 0.85f),
-                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f),
-            )
-        }
-    }
-}
