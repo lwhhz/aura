@@ -150,7 +150,10 @@ fun SettingsScreen(
                             contentColor = accent.onDeep,
                         ) {
                             Column(Modifier.padding(20.dp)) {
-                                Eyebrow("设置", color = accent.lemon)
+                                Eyebrow(
+                                    "设置",
+                                    color = if (dark) accent.onDeep.copy(alpha = 0.72f) else accent.lemon,
+                                )
                                 Spacer(Modifier.height(10.dp))
                                 Text(
                                     text = "把这台手机接到\n你自己的模型上",
@@ -255,6 +258,9 @@ fun SettingsScreen(
                                     val turns = listOf(5, 10, 20, 50)[index]
                                     onChange { it.copy(detailMaxTurns = turns) }
                                 },
+                                unselectedContainer = if (dark) null else Color.White.copy(alpha = 0.16f),
+                                unselectedContent = if (dark) null else accent.onDeep,
+
                             )
                             Spacer(Modifier.height(12.dp))
                             Text("每轮最多消息", style = MaterialTheme.typography.bodySmall, color = palette.eyebrow)
@@ -266,6 +272,9 @@ fun SettingsScreen(
                                     val items = listOf(20, 50, 100)[index]
                                     onChange { it.copy(detailMaxItems = items) }
                                 },
+                                unselectedContainer = if (dark) null else Color.White.copy(alpha = 0.16f),
+                                unselectedContent = if (dark) null else accent.onDeep,
+
                             )
                         }
                     }
