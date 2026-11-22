@@ -237,101 +237,22 @@ fun DshDetailScreen(
                     }
                     item(key = "spacer") { Spacer(Modifier.height(24.dp)) }
                 }
-                if (sendError != null) {
-                    Text(
-                        "发送失败：" + sendError,
-                        Modifier.padding(horizontal = 20.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = accent.muted,
-                    )
-                }
-                if (attachError != null) {
-                    Text(
-                        text = attachError!!,
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = accent.muted,
-                    )
-                }
-                if (pendingFiles.isNotEmpty()) {
-                    androidx.compose.foundation.lazy.LazyRow(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        item {
-                            Text(
-                                text = pendingFiles.size.toString() + " 个待发送",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = accent.muted,
-                                modifier = Modifier.padding(top = 6.dp),
-                            )
-                        }
-                        items(pendingFiles.size) { index ->
-                            val (name, bytes) = pendingFiles[index]
-                            Surface(shape = RoundedCornerShape(10.dp), color = accent.chip) {
-                                Row(
-                                    modifier = Modifier.padding(start = 8.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(
-                                        text = name.take(14) + " · " + (bytes.size / 1024) + "KB",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = accent.onChip,
-                                        maxLines = 1,
-                                    )
-                                    Text(
-                                        text = "  ×",
-                                        modifier = Modifier.clickable {
-                                            pendingFiles = pendingFiles.filterIndexed { i, _ -> i != index }
-                                        },
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = accent.onChip,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-                Row(
-                    Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(onClick = { picker.launch("*/*") }, enabled = !sending) {
-                        Icon(Icons.Rounded.AttachFile, contentDescription = "上传文件", tint = accent.muted)
-                    }
-                    TextField(
-                        value = draft,
-                        onValueChange = { draft = it },
-                        modifier = Modifier.weight(1f),
-                        placeholder = { Text(uploadProgress ?: if (sending) "正在发送…" else "发消息给这台电脑", style = MaterialTheme.typography.bodyMedium) },
-                        shape = RoundedCornerShape(20.dp),
-                        interactionSource = inputInteraction,
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = accent.card,
-                            unfocusedContainerColor = accent.card,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                        ),
-                        maxLines = 4,
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    AuraPill(
-                        text = if (sending) "…" else "发送",
-                        onClick = {
-                            if (sending) return@AuraPill
-                            if (pendingFiles.isNotEmpty()) {
-                                onUploadMany(pendingFiles, draft.trim())
-                                draft = ""
-                                pendingFiles = emptyList()
-                            } else if (draft.isNotBlank()) {
-                                onSend(draft.trim())
-                                draft = ""
-                            }
-                        },
-                        style = PillStyle.Deep,
-                    )
-                }
+                com.aura.chat.ui.components.DshComposer(
+                    draft = draft,
+                    onDraftChange = { draft = it },
+                    pendingFiles = pendingFiles,
+                    onRemoveFile = { index -> pendingFiles = pendingFiles.filterIndexed { i, _ -> i != index } },
+                    attachError = attachError,
+                    sendError = sendError,
+                    sending = sending,
+                    uploadProgress = uploadProgress,
+                    onPick = { picker.launch("*/*") },
+                    onSend = { text, files ->
+                        if (files.isNotEmpty()) onUploadMany(files, text.trim()) else onSend(text.trim())
+                        draft = ""
+                        pendingFiles = emptyList()
+                    },
+                )
             }
         }
     }

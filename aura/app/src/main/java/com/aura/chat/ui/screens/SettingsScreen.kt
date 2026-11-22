@@ -137,13 +137,13 @@ fun SettingsScreen(
                 LightTopBar(title = "设置", onBack = onBack)
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 6.dp, bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 6.dp, bottom = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     item {
                         Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(32.dp),
+                            shape = com.aura.chat.ui.theme.AuraShapeTokens.extraLargeIncreased,
                             color = accent.deep,
                             contentColor = accent.onDeep,
                         ) {
@@ -178,7 +178,7 @@ fun SettingsScreen(
                                 label = { Text("API Key") },
                                 placeholder = { Text("sk-…") },
                                 singleLine = true,
-                                shape = RoundedCornerShape(20.dp),
+                                shape = com.aura.chat.ui.theme.AuraShapeTokens.largeIncreased,
                                 visualTransformation = if (keyVisible) VisualTransformation.None else PasswordVisualTransformation(),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                                 trailingIcon = {
@@ -198,7 +198,7 @@ fun SettingsScreen(
                                 modifier = Modifier.fillMaxWidth(),
                                 label = { Text("Base URL") },
                                 singleLine = true,
-                                shape = RoundedCornerShape(20.dp),
+                                shape = com.aura.chat.ui.theme.AuraShapeTokens.largeIncreased,
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri),
                                 colors = solidFieldColors(),
                             )
@@ -339,7 +339,7 @@ fun SettingsScreen(
                     dismissButton = {
                         TextButton(onClick = { confirmClear = false }) { Text("取消", color = Color(0xFF827B91)) }
                     },
-                    shape = RoundedCornerShape(30.dp),
+                    shape = com.aura.chat.ui.theme.AuraShapeTokens.extraLarge,
                     containerColor = Color.White,
                 )
             }
@@ -356,7 +356,7 @@ private fun SettingsCard(
     val palette = LocalSettingsPalette.current
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
+        shape = com.aura.chat.ui.theme.AuraShapeTokens.extraLargeIncreased,
         color = palette.card,
         contentColor = palette.onCard,
     ) {
