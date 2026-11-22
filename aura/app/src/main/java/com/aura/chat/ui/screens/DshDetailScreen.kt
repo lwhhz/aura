@@ -46,6 +46,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.aura.chat.data.DshSessionDetail
@@ -182,11 +184,13 @@ fun DshDetailScreen(
                         color = accent.deep.copy(alpha = 0.10f),
                     ) {
                         Row(
-                            Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                            Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             androidx.compose.material3.LoadingIndicator(
-                                modifier = Modifier.size(48.dp),
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .semantics { contentDescription = "正在处理" },
                             )
                             Spacer(Modifier.width(10.dp))
                             Text(
