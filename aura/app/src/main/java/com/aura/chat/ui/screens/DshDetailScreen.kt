@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -159,7 +161,15 @@ fun DshDetailScreen(
     ) {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
             LavenderField()
-            Column(Modifier.fillMaxSize().statusBarsPadding().imePadding().navigationBarsPadding()) {
+            Column(
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .widthIn(max = 860.dp)
+                    .fillMaxHeight()
+                    .statusBarsPadding()
+                    .imePadding()
+                    .navigationBarsPadding()
+            ) {
                 LightTopBar(title = "会话详情", onBack = onBack)
                 Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
                     Eyebrow("实时输出 · 3 秒刷新", color = accent.onChip)
